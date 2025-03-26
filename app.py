@@ -54,7 +54,7 @@ os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 BASE_OUTPUT_FOLDER = "extracted_resources"
 os.makedirs(BASE_OUTPUT_FOLDER, exist_ok=True)
 
-trid_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "trid_w32", "trid.exe"))
+trid_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "trid_w32", "trid.exe","trid"))
 
 VIRUSTOTAL_API_KEY = "952bda09ecef7bf22c9a8c9b7dff66701109ef5b8dd5ec33307c193b056538bc"
 
