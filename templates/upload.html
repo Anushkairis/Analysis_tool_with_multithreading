@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>File Upload and Analysis</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='upload.css') }}?v={{ time }}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <style>
+        .disabled {
+            pointer-events: none;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <span class="logo">Static Analysis Tool</span>
+        <a href="{{ url_for('logout') }}">
+            <div class="user-icon">Logout</div>
+        </a>
+    </div>
+
+    <h1>Upload File for Analysis</h1>
+    <form id="fileForm" action="/upload/{{ session['session_id'] }}" method="post" enctype="multipart/form-data">
+        <div id="dropBox">Drop your file here or click to upload</div>
+        <input type="file" id="fileInput" name="file" style="display: none" accept=".exe,.bin,.dll,.sys,.ocx,.scr,.tsp,.cpl" />
+        <div id="fileName"></div>
+        <button type="button" id="analyzeButton" style="display:none;">Analyze</button>
+    </form>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const dropBox = document.getElementById("dropBox");
+            const fileInput = document.getElementById("fileInput");
+            const fileNameDisplay = document.getElementById("fileName");
+            const analyzeButton = document.getElementById("analyzeButton");
+            const fileForm = document.getElementById("fileForm");
+
+            // Show file input on dropBox click
+            dropBox.addEventListener("click", () => fileInput.click());
+
+            // Highlight drop area during drag over
+            dropBox.addEventListener("dragover", (e) => {
+                e.preventDefault();
+                dropBox.style.borderColor = "blue";
+            });
+
+            // Reset drop area style after drag leaves
+            dropBox.addEventListener("dragleave", () => {
+                dropBox.style.borderColor = "#ccc";
+            });
+
+            // Handle file drop
+            dropBox.addEventListener("drop", (e) => {
+                e.preventDefault();
+                dropBox.style.borderColor = "#ccc";
+                const file = e.dataTransfer.files[0];
+                handleFileUpload(file);
+            });
+
+            // Handle file selection through file input
+            fileInput.addEventListener("change", () => {
+                const file = fileInput.files[0];
+                handleFileUpload(file);
+            });
+
+            // Function to handle file validation and button display
+            function handleFileUpload(file) {
+                if (file && file.name.match(/\.(exe|bin|dll|sys|ocx|scr|tsp|cpl)$/)) {
+                    fileNameDisplay.textContent = `File uploaded: ${file.name}`;
+                    analyzeButton.style.display = "inline-block"; // Show the analyze button
+                } else {
+                    alert("Invalid file type. Only executable and binary files are allowed.");
+                    fileInput.value = ""; // Clear file input if invalid file is selected
+                    analyzeButton.style.display = "none"; // Hide the analyze button if file is invalid
+                }
+            }
+
+            // Handle analyze button click to submit form and redirect to the result page
+            analyzeButton.addEventListener("click", () => {
+                analyzeButton.disabled = true;
+                analyzeButton.textContent = "Analyzing...";
+
+                const formData = new FormData(fileForm);
+
+                fetch("/upload/{{ session['session_id'] }}", {
+                    method: "POST",
+                    body: formData,
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // Redirect to the results page
+                        window.location.href = "/result/{{ session['session_id'] }}";
+                    } else {
+                        // Only alert on failure
+                        alert("Failed to upload and analyze the file.");
+                    }
+                })
+                .catch(error => {
+                    alert("An error occurred while processing the file.");
+                    console.error(error);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

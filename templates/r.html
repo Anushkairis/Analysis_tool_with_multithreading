@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis Results</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='result.css') }}" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+</head>
+<body class="none">
+    <!-- Responsive Navbar -->
+    <div class="navbar">
+        <a class="logo">Static Analysis Tool</a>
+        <a href="{{ url_for('logout') }}">
+            <div class="user-icon">Logout</div>
+        </a>
+    </div>
+    <div id="resultsContainer">
+        
+        <div class="container3">
+            <h1 id="info-page">Results</h1>
+        </div>
+
+        <div class="row1">
+            <div class="row-container">
+                <div class="file-info-section">
+                    <div class="card-header1">
+                        
+                        <div>File Information</div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table">
+                            
+                            <tr>
+                                <th>Filename</th>
+                                
+                                <td id="filename"><div id="loadingFileDetails" class="loading-spinner" style="display: none;">
+                                    <img src="/static/loading.gif" alt="Loading...">
+                                </div></td>
+                            </tr>
+                            <tr>
+                                <th>File Size</th>
+                                
+                                <td id="fileSize"><div id="loadingFileDetails" class="loading-spinner" style="display: none;">
+                                    <img src="/static/loading.gif" alt="Loading...">
+                                </div></td>
+                            </tr>
+                            <tr>
+                                <th>Compiler</th>
+                                <td id="compiler-info"></td>
+                            </tr>
+                            <tr>
+                                <th>MD5</th>
+                                
+                                <td id= "md5"><div id="loadingMetadata" class="loading-spinner" style="display: none;">
+                                    <img src="/static/loading.gif" alt="Loading...">
+                                </div></td>
+                            </tr>
+                            <tr>
+                                <th>SHA1</th>
+                               
+                                <td id= "sha1"> <div id="loadingMetadata" class="loading-spinner" style="display: none;">
+                                    <img src="/static/loading.gif" alt="Loading...">
+                                </div></td>
+                            </tr>
+                            <tr>
+                                <th>SHA256</th>
+                                
+                                <td id= "sha256"><div id="loadingMetadata" class="loading-spinner" style="display: none;">
+                                    <img src="/static/loading.gif" alt="Loading...">
+                                </div></td>
+                            </tr>
+                            <tr>
+                                <th>Analysis</th>
+                                
+                                <td id= "analysis"><div id="loadingMetadata" class="loading-spinner" style="display: none;">
+                                    <img src="/static/loading.gif" alt="Loading...">
+                                </div></td>
+                            </tr>
+                            <tr>
+                                <th>Operating System</th>
+                                
+                                <td id= "operatingSystem"><div id="loadingMetadata" class="loading-spinner" style="display: none;">
+                                    <img src="/static/loading.gif" alt="Loading...">
+                                </div></td>
+                            </tr>
+                            <tr>
+                                <th>Format</th>
+                               
+                                <td id= "format"> <div id="loadingMetadata" class="loading-spinner" style="display: none;">
+                                    <img src="/static/loading.gif" alt="Loading...">
+                                </div></td>
+                            </tr>
+                            <tr>
+                                <th>Architecture</th>
+                               
+                                <td id= "architecture">  <div id="loadingMetadata" class="loading-spinner" style="display: none;">
+                                    <img src="/static/loading.gif" alt="Loading...">
+                                </div></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="vt-results">
+                    <div class="card-header2">
+                        <div> Virus Total Scan Results</div>
+                    </div>
+                    <table class="vt-table">
+                        <tbody>
+                            <div id="loadingChartResults" class="loading-spinner" style="display: none;">
+                                <img src="/static/loading.gif" alt="Loading...">
+                            </div>
+                            <tr>
+                                <td>
+                                   
+                                    <img src="" id="chartImage"
+                                        alt="Chart">
+                                </td>
+                                <td>
+                                    <div id="scanResults">
+                                        <div id="loadingScanResults" class="loading-spinner" style="display: none;">
+                                            <img src="/static/loading.gif" alt="Loading...">
+                                        </div>
+                                        <p><strong>Total:</strong> </p>
+                                        <p><strong>Malicious:</strong></p>
+                                        <p><strong>Clean:</strong> </p>
+                                        <p><strong>Suspicious:</strong></p>
+                                        <p><strong>Undetected:</strong> </p>
+                                        <p><strong>Timeout:</strong> </p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- Parent Button -->
+        <div class="parent-container">
+            <button class="parent-btn" onclick="tArrow()">
+                Detailed Analysis
+                <svg class="arrow up" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20">
+                    <path d="M12 4l-8 8h16l-8-8zm0 8l-8 8h16l-8-8z" fill="black" />
+                </svg>
+            </button>
+        </div>
+        <!-- Hidden Content -->
+        <div class="hiddenContent">
+            <div class="row-container1">
+
+                <div class="column3" style="width: 100%;">
+                    <div class="card-trid">
+                        <h2>TrID Analysis</h2>
+                        <hr>
+                        <pre><div id="loadingTridAnalysis" class="loading-spinner" style="display: none;">
+                            <img src="/static/loading.gif" alt="Loading...">
+                        </div></pre>
+                    </div>
+
+                    <div class="card">
+                        <h2 class="card-heading" style="margin: 0;">
+                            <img src="{{ url_for('static', filename='S.png') }}"
+                                style="width: 100%; height: auto; display: block;">
+                        </h2>
+                        <div class="scrollable-content"
+                            style="max-height: 366px; overflow-y: auto; padding-right: 10px;">
+                            <hr>
+                            <div class="card-section">
+                                <h3>ATT&CK Tactics and Techniques</h3>
+                                
+                                <ul id="attack-tactics">
+                                    <div id="loadingAttackTactics" class="loading-spinner" style="display: none;">
+                                        <img src="/static/loading.gif" alt="Loading...">
+                                    </div>
+                                    <li><strong> </strong></li>
+                                    
+                                </ul>
+                                
+                            </div>
+
+                            <div class="card-section">
+                                <hr>
+                                <h3>MBC Objective and Behaviour</h3>
+                                <div id="loadingMBCData" class="loading-spinner" style="display: none;">
+                                    <img src="/static/loading.gif" alt="Loading...">
+                                </div>
+                                <ul id="mbc-data">
+                                   
+                                    <li><strong></strong></li>
+                                   
+                                </ul>
+                               
+                            </div>
+
+                            <div class="card-section">
+                                <hr>
+                                <h3>Namespace and Capability</h3>
+                                <div id="loadingNamespaceCapabilities" class="loading-spinner" style="display: none;">
+                                    <img src="/static/loading.gif" alt="Loading...">
+                                </div>
+                                <ul id="namespace-capabilities">
+                                   
+                                    <li><strong></strong></li>
+                                </ul>
+                                
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card3" style="height: 100%;">
+                        <h2>Import Table</h2>
+                        <hr>
+                        <div id="import-table-content">
+                            <div id="loadingImportTable" class="loading-spinner" style="display: none;">
+                                <img src="/static/loading.gif" alt="Loading...">
+                            </div>
+                            <ul></ul>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="column1">
+                    <div class="section-result">
+                        <h2>Section Headers</h2>
+                        <hr>
+                        <div id="section-headers-content">
+                            <table class="section-headers">
+                                <thead>
+                                    <tr>
+                                        <th>Section Name</th>
+                                        <th>Virtual Address</th>
+                                        <th>Virtual Size</th>
+                                        <th>Raw Size</th>
+                                        <th>Permissions</th>
+                                        <th>Entropy</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <div id="loadingSectionHeaders" class="loading-spinner" style="display: none;">
+                                        <img src="/static/loading.gif" alt="Loading...">
+                                    </div>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card4" style="margin-bottom: 17px;">
+                        <h2>High Entropy Sections</h2>
+                        <hr>
+                        <div id="high-entropy-content">
+                            <table class="entropy-table">
+                                <thead>
+                                    <tr>
+                                        <th>Section</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td id="loadingEntropy" class="loading-spinner" style="display: none;">
+                                            <img src="/static/loading.gif" alt="Loading...">
+                                        </td>
+                                    </tr>
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card5">
+                        <h2>Export Table</h2>
+                        <hr>
+                        <div id="export-table-content">
+                            <table class="export-table">
+                                <thead>
+                                    <tr>
+                                        <th>Export Name</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td id="loadingExportTable" class="loading-spinner" style="display: none;">
+                                            <img src="/static/loading.gif" alt="Loading...">
+                                        </td>
+                                    </tr>
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="cardss" style="height: 100%;">
+                        <h2>Malicious Indicators</h2>
+                        <hr>
+                        <div id="malicious-indicators-content">
+                            <h3 id="malicious-strings-header">
+                                Malicious Strings
+                                <svg id="malicious-strings-togg-icon" xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                                    <rect x="4" y="11" width="16" height="2" />
+                                    <rect class="vertical-bar" x="11" y="4" width="2" height="16" />
+                                </svg>
+                            </h3>
+                            <ul id="malicious-strings-list" style="display: none;">
+                                <div id="loadingMaliciousIndicators" class="loading-spinner" style="display: none;">
+                                    <img src="/static/loading.gif" alt="Loading...">
+                                </div>
+                                <li></li>
+                            
+                            </ul>
+
+                            <h3 id="malicious-apis-header">
+                                Malicious APIs
+                                <svg id="malicious-apis-togg-icon" xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                                    <rect x="4" y="11" width="16" height="2" />
+                                    <rect class="vertical-bar" x="11" y="4" width="2" height="16" />
+                                </svg>
+                            </h3>
+                            <ul id="malicious-api-list" style="display: none;">
+                                <div id="loadingMaliciousIndicators" class="loading-spinner" style="display: none;">
+                                    <img src="/static/loading.gif" alt="Loading...">
+                                </div>
+                                <li></li>
+
+                            </ul>
+
+                            <h3 id="malicious-emails-header">
+                                Emails Found
+                                <svg id="malicious-emails-togg-icon" xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                                    <rect x="4" y="11" width="16" height="2" />
+                                    <rect class="vertical-bar" x="11" y="4" width="2" height="16" />
+                                </svg>
+                            </h3>
+                            <ul id="malicious-emails-list" style="display: none;">
+                                <div id="loadingMaliciousIndicators" class="loading-spinner" style="display: none;">
+                                    <img src="/static/loading.gif" alt="Loading...">
+                                </div>
+                                <li></li>
+
+                            </ul>
+
+                            <h3 id="malicious-urls-header">
+                                URLs Found
+                                <svg id="malicious-urls-togg-icon" xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                                    <rect x="4" y="11" width="16" height="2" />
+                                    <rect class="vertical-bar" x="11" y="4" width="2" height="16" />
+                                </svg>
+                            </h3>
+                            <ul id="malicious-url-list" style="display: none;">
+                                <div id="loadingMaliciousIndicators" class="loading-spinner" style="display: none;">
+                                    <img src="/static/loading.gif" alt="Loading...">
+                                </div>
+                                <li></li>
+
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="extracted-resources">
+                <div class="extracted-header">
+                    <h3 class="extracted-resources-text">Extracted Resources</h3>
+                    <a class="btnspan"
+                        href="{{ url_for('download_zip', zip_name='extracted_resources_protected.zip') }}"
+                        title="Download and Check this file at your own risk, it may be malicious. Folder Password: mypassword"
+                        download>
+                        Download ZIP
+                    </a>
+                    <!-- {% if zip_download_link %}
+                        <a href="{{ zip_download_link }}" class="btn btn-primary">Download Extracted Resources (ZIP)</a>
+                    {% endif %} -->
+
+                </div>
+                
+                <hr>
+            
+                <div id="extracted-resources-content">
+                    <table class="resource-table">
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>Size</th>
+                                <th>Details</th>
+                                <th>Extracted Text</th>
+                                <th>Raw Content</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            
+                            <tr>
+                                <td id="loadingResources" class="loading-spinner" style="display: none;">
+                                    <img src="/static/loading.gif" alt="Loading...">
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+
+            <div class="extracted-strings">
+                <h2>Extracted Strings</h2>
+                <hr>
+                <div class="container1">
+                    <div class="tabs">
+                        <button class="tab active" onclick="openTab('ascii')">ASCII</button>
+                        <button class="tab" onclick="openTab('wide')">Wide</button>
+                        <button class="tab" onclick="openTab('rankedStrings')">Ranked Strings</button>
+                    </div>
+            
+                    <div class="content">
+                        <div id="ascii" class="tab-content active">
+                            <div id="loadingStrings" class="loading-spinner" style="display: none;">
+                                <img src="/static/loading.gif" alt="Loading...">
+                            </div>
+                            <ul></ul>
+                        </div>
+            
+                        <div id="wide" class="tab-content">
+                            <div id="loadingStrings" class="loading-spinner" style="display: none;">
+                                <img src="/static/loading.gif" alt="Loading...">
+                            </div>
+                            <ul></ul>
+                        </div>
+            
+                        <div id="rankedStrings" class="tab-content">
+                            <div id="loadingStrings" class="loading-spinner" style="display: none;">
+                                <img src="/static/loading.gif" alt="Loading...">
+                            </div>
+                            <ul></ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="download-section">
+                <a href="{{ url_for('download_report', output_filename='Generated_PDF_report.pdf') }}" class="download-button">
+                    Download Report
+                </a>
+            </div>
+        </div>
+        <div class="download-section">
+            <a href="{{ url_for('upload_dashboard', session_id=session['session_id']) }}" class="download-button">Upload another file</a>
+        </div>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const sessionId = "{{ session_id }}";
+            let fetchInterval;
+
+            // ✅ Display error messages
+            const displayError = (message) => {
+                const errorContainer = document.getElementById("error-message");
+                if (!errorContainer) {
+                    console.warn("Error container not found.");
+                    return;
+                }
+                errorContainer.innerHTML = `<p style="color: red;">${message}</p>`;
+                errorContainer.style.display = "block";
+            };
+
+            // ✅ Safe way to show/hide loading indicators
+            const showLoading = (id) => {
+                const element = document.getElementById(id);
+                if (element) element.style.display = "block";
+            };
+
+            const hideLoading = (id) => {
+                const element = document.getElementById(id);
+                if (element) element.style.display = "none";
+            };
+
+            // ✅ Fetch results periodically
+            const fetchResults = async () => {
+                try {
+                    const response = await fetch(`/check_status/${sessionId}`);
+                    if (!response.ok) throw new Error("Network response was not ok");
+
+                    const data = await response.json();
+                    // console.log("Fetched Data:", data);
+
+                    if (data.error) {
+                        displayError(data.error.message);
+                        return;
+                    }
+
+                    // ✅ Update UI with retrieved data
+                    updateScanResults(data.stats);
+                    updateChartResults(data.chart);
+                    updateCompilerInfo(data.compiler);
+                    updateFileDetails(data.filename, data.file_size);
+                    updateSectionHeaders(data.section_headers);
+                    updateImportTable(data.import_table);
+                    updateExportTable(data.export_table);
+                    populateMaliciousIndicators(data);
+                    updateTridAnalysis(data.trid);
+                    updateStrings(data);
+                    updateHighEntropySections(data.high_entropy_sections);
+                    updateExtractedResources(data.extracted_resources);
+                    updateMetadata(data.metadata);
+                    updateAttackTactics(data.tactics_techniques);
+                    updateMBCData(data.mbc_data);
+                    updateNamespaceCapabilities(data.capability_namespace);
+
+                    // ✅ Stop fetching once all results are complete
+                    if (data.complete) {
+                        clearInterval(fetchInterval);
+                        console.log("Fetching stopped. All results retrieved.");
+                    }
+                } catch (error) {
+                    console.error("Error fetching results:", error);
+                    displayError("Failed to fetch results. Please try again later.");
+                }
+            };
+
+            // ✅ Start polling for data every 5 seconds
+            fetchInterval = setInterval(fetchResults, 5000);
+            const updateScanResults = (stats) => {
+                showLoading("loadingScanResults");
+
+                setTimeout(() => {
+                    hideLoading("loadingScanResults");
+
+                    document.querySelector("#scanResults").innerHTML = `
+                        <p><strong>Total:</strong> ${stats.total}</p>
+                        <p><strong>Malicious:</strong> ${stats.malicious}</p>
+                        <p><strong>Clean:</strong> ${stats.harmless}</p>
+                        <p><strong>Suspicious:</strong> ${stats.suspicious}</p>
+                        <p><strong>Undetected:</strong> ${stats.undetected}</p>
+                        <p><strong>Timeout:</strong> ${stats.timeout}</p>
+                    `;
+
+                    document.getElementById("resultsTable").style.display = "table";
+                }, 1000);
+            };
+
+            const updateChartResults = (chart) => {
+                showLoading("loadingChartResults");
+
+                setTimeout(() => {
+                    hideLoading("loadingChartResults");
+                    document.querySelector("#chartImage").src = `/uploads/${chart}`;
+                }, 1000);
+            };
+
+
+            const updateCompilerInfo = (compiler) => {
+                showLoading("loadingCompilerInfo");
+
+                setTimeout(() => {
+                    hideLoading("loadingCompilerInfo");
+                    document.querySelector("#compiler-info").textContent = compiler || "N/A";
+                }, 1000);
+            };
+
+            const updateFileDetails = (filename, fileSize) => {
+                showLoading("loadingFileDetails");
+
+                setTimeout(() => {
+                    hideLoading("loadingFileDetails");
+                    if (filename) document.querySelector("#filename").innerText = filename;
+                    if (fileSize) document.querySelector("#fileSize").innerText = `${(fileSize / 1024).toFixed(2)} KB`;
+                }, 1000);
+            };
+
+            const updateSectionHeaders = (sectionHeaders) => {
+                showLoading("loadingSectionHeaders");
+
+                setTimeout(() => {
+                    hideLoading("loadingSectionHeaders");
+
+                    if (!sectionHeaders) return;
+                    const tableBody = document.querySelector(".section-headers tbody");
+                    tableBody.innerHTML = sectionHeaders.map(section => `
+                        <tr>
+                            <td>${section.name}</td>
+                            <td>${section.virtual_address}</td>
+                            <td>${section.virtual_size}</td>
+                            <td>${section.raw_size}</td>
+                            <td>${section.permissions}</td>
+                            <td>${section.entropy}</td>
+                        </tr>
+                    `).join('');
+                }, 1000);
+            };
+
+            const updateImportTable = (importTable) => {
+                showLoading("loadingImportTable");
+
+                setTimeout(() => {
+                    hideLoading("loadingImportTable");
+
+                    const container = document.getElementById("import-table-content");
+                    if (!importTable || importTable.length === 0) {
+                        container.innerHTML = "<p>No import table found.</p>";
+                        return;
+                    }
+                    container.innerHTML = importTable.map(dll => `
+                        <li>
+                            <span class="toggle-btn" onclick="toggleFunctions(this)" style="font-weight: bold; cursor: pointer;">- ${dll.dll}</span>
+                            <ul class="functions-list" style="display:none; background: #f4f4f4; padding: 10px; margin-left: 20px;">
+                                ${dll.functions.map(func => `<li style="list-style-type: none; padding-left: 10px;">- ${func}</li>`).join('')}
+                            </ul>
+                        </li>
+                    `).join('');
+                    document.querySelectorAll('.toggle-btn').forEach(button => {
+                        button.addEventListener("click", function () {
+                            const functionsList = this.nextElementSibling;
+                            if (functionsList.style.display === "none") {
+                                functionsList.style.display = "block";
+                                this.innerHTML = `- ${this.innerHTML.substring(2)}`;
+                            } else {
+                                functionsList.style.display = "none";
+                                this.innerHTML = `+ ${this.innerHTML.substring(2)}`;
+                            }
+                        });
+                    });
+                }, 1000);
+            };
+
+
+
+            const updateExportTable = (exportTable) => {
+                showLoading("loadingExportTable");
+
+                setTimeout(() => {
+                    hideLoading("loadingExportTable");
+
+                    if (!exportTable) return;
+                    document.querySelector(".export-table tbody").innerHTML = exportTable.map(entry => `
+                        <tr><td>${entry}</td></tr>
+                    `).join('');
+                }, 1000);
+            };
+
+            const populateMaliciousIndicators = (data) => {
+                showLoading("loadingMaliciousIndicators");
+
+                setTimeout(() => {
+                    hideLoading("loadingMaliciousIndicators");
+
+                    const sections = [
+                        { key: "malicious_strings", listId: "malicious-strings-list" },
+                        { key: "malicious_apis", listId: "malicious-api-list" },
+                        { key: "emails_found", listId: "malicious-emails-list" },
+                        { key: "urls_found", listId: "malicious-url-list" }
+                    ];
+                    sections.forEach(section => {
+                        const listElement = document.getElementById(section.listId);
+                        listElement.innerHTML = data[section.key]?.length ? data[section.key].map(item => `<li>${item}</li>`).join('') : "<li>No data found</li>";
+                    });
+                }, 1000);
+            };
+
+            const updateTridAnalysis = (trid) => {
+                showLoading("loadingTridAnalysis");
+
+                setTimeout(() => {
+                    hideLoading("loadingTridAnalysis");
+
+                    if (trid) document.querySelector(".card-trid pre").innerText = trid;
+                }, 1000);
+            };
+
+            const updateStrings = (data) => {
+                showLoading("loadingStrings");
+
+                setTimeout(() => {
+                    hideLoading("loadingStrings");
+
+                    if (data.ascii_strings) {
+                        document.querySelector("#ascii ul").innerHTML = data.ascii_strings.map(str => `<li>${str}</li>`).join('');
+                    }
+                    if (data.wide_strings) {
+                        document.querySelector("#wide ul").innerHTML = data.wide_strings.map(str => `<li>${str.decrypted || str.encrypted}</li>`).join('');
+                    }
+                    if (data.ranked_strings) {
+                        document.querySelector("#rankedStrings ul").innerHTML = data.ranked_strings.map(([string, score]) =>
+                            `<li>${string} (Score: ${score})</li>`
+                        ).join('');
+                    }
+                }, 1000);
+            };
+
+            const updateHighEntropySections = (sections) => {
+                showLoading("loadingEntropy");
+
+                setTimeout(() => {
+                    hideLoading("loadingEntropy");
+
+                    if (sections) {
+                        document.querySelector(".entropy-table tbody").innerHTML = sections.map(section => `<tr><td>${section}</td></tr>`).join('');
+                    }
+                }, 1000);
+            };
+
+            const updateExtractedResources = (resources) => {
+                showLoading("loadingResources");
+
+                setTimeout(() => {
+                    hideLoading("loadingResources");
+
+                    if (!resources) return;
+                    const tableBody = document.querySelector(".resource-table tbody");
+                    tableBody.innerHTML = resources.map(resource => `
+                        <tr>
+                            <td>${resource.type || "Unknown"}</td>
+                            <td>${resource.size} KB</td>
+                            <td>${resource.filename || "N/A"}</td>
+                            <td>${resource.extracted_text || "N/A"}</td>
+                            <td><pre>${resource.raw_content || "N/A"}</pre></td>
+                        </tr>
+                    `).join('');
+                }, 1000);
+            };
+       
+            const updateMetadata = (metadata) => {
+                    showLoading("loadingMetadata");
+
+                    setTimeout(() => {
+                        hideLoading("loadingMetadata");
+
+                        if (!metadata) return;
+
+                        document.getElementById("md5").innerText = metadata.md5 || "N/A";
+                        document.getElementById("sha1").innerText = metadata.sha1 || "N/A";
+                        document.getElementById("sha256").innerText = metadata.sha256 || "N/A";
+                        document.getElementById("analysis").innerText = metadata.analysis || "N/A";
+                        document.getElementById("operatingSystem").innerText = metadata.os || "N/A";
+                        document.getElementById("format").innerText = metadata.format || "N/A";
+                        document.getElementById("architecture").innerText = metadata.arch || "N/A";
+
+                        document.getElementById("metadataTable").style.display = "table"; // Show the table after loading
+                    }, 1000);
+            };
+
+
+            const updateAttackTactics = (tacticsTechniques) => {
+                    showLoading("loadingAttackTactics");
+
+                    setTimeout(() => {
+                        hideLoading("loadingAttackTactics");
+
+                        const attackList = document.getElementById("attack-tactics");
+                        attackList.innerHTML = ""; // Clear previous entries
+
+                        if (tacticsTechniques && tacticsTechniques.length > 0) {
+                            tacticsTechniques.forEach(([tactic, technique]) => {
+                                attackList.innerHTML += `<li><strong>${tactic}</strong> - ${technique}</li>`;
+                            });
+                        } else {
+                            attackList.innerHTML = "<li>No ATT&CK data found.</li>";
+                        }
+
+                        attackList.style.display = "block"; // Show list after loading
+                    }, 1000);
+            };
+
+            const updateMBCData = (mbcData) => {
+                    showLoading("loadingMBCData");
+
+                    setTimeout(() => {
+                        hideLoading("loadingMBCData");
+
+                        const mbcList = document.getElementById("mbc-data");
+                        mbcList.innerHTML = "";
+
+                        if (mbcData && mbcData.length > 0) {
+                            mbcData.forEach(([objective, behavior]) => {
+                                mbcList.innerHTML += `<li><strong>${objective}</strong> - ${behavior}</li>`;
+                            });
+                        } else {
+                            mbcList.innerHTML = "<li>No MBC data found.</li>";
+                        }
+
+                        mbcList.style.display = "block"; // Show list after loading
+                    }, 1000);
+            };
+
+            const updateNamespaceCapabilities = (capabilityNamespace) => {
+                    showLoading("loadingNamespaceCapabilities");
+
+                    setTimeout(() => {
+                        hideLoading("loadingNamespaceCapabilities");
+
+                        const namespaceList = document.getElementById("namespace-capabilities");
+                        namespaceList.innerHTML = "";
+
+                        if (capabilityNamespace && capabilityNamespace.length > 0) {
+                            capabilityNamespace.forEach(([capability, namespace]) => {
+                                namespaceList.innerHTML += `<li><strong>${capability}</strong> - ${namespace}</li>`;
+                            });
+                        } else {
+                            namespaceList.innerHTML = "<li>No Namespace & Capabilities found.</li>";
+                        }
+
+                        namespaceList.style.display = "block"; // Show list after loading
+                    }, 1000);
+            };
+    });
+
+
+    </script>
+    <script>
+        function tArrow() {
+            const content = document.querySelector(".hiddenContent");
+            const arrow = document.querySelector(".arrow");
+
+            // Toggle the visibility of the content
+            if (content.style.display === "none" || content.style.display === "") {
+                content.style.display = "flex"; // Show the content
+                arrow.classList.remove("up"); // Rotate arrow downward
+                arrow.classList.add("down");
+            } else {
+                content.style.display = "none"; // Hide the content
+                arrow.classList.remove("down"); // Rotate arrow upward
+                arrow.classList.add("up");
+            }
+        }
+
+        // Event Delegation for dynamically added SVG icons
+        document.addEventListener('click', (event) => {
+            const icon = event.target.closest('.toggle-icon');
+            if (!icon) return;
+
+            const parentLi = icon.closest('li');
+            const functionsDiv = parentLi.querySelector(".functions");
+
+            // Toggle functions visibility
+            functionsDiv.style.display = (functionsDiv.style.display === 'block') ? 'none' : 'block';
+
+            // Toggle "plus" and "minus" sign
+            const verticalBar = icon.querySelector('.vertical-bar');
+            if (verticalBar) {
+                verticalBar.style.display = (verticalBar.style.display === 'none') ? 'block' : 'none';
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggleIcons = document.querySelectorAll('.card3 .toggle-icon');
+
+            toggleIcons.forEach(icon => {
+                icon.addEventListener('click', () => {
+                    const parentLi = icon.closest('li');
+                    const functionsDiv = parentLi.nextElementSibling;
+
+                    // Toggle content visibility
+                    parentLi.classList.toggle('open');
+                    functionsDiv.style.display = functionsDiv.style.display === 'block' ? 'none' : 'block';
+
+                    // Toggle "plus" and "minus" in the icon
+                    const verticalBar = icon.querySelector('.vertical-bar');
+                    if (verticalBar) {
+                        verticalBar.style.display = verticalBar.style.display === 'none' ? 'block' : 'none';
+                    }
+                });
+            });
+        })
+
+        document.querySelectorAll('.toggle-btn').forEach(button => {
+            button.addEventListener("click", function () {
+                const functionsList = this.nextElementSibling;
+                if (functionsList.style.display === "none") {
+                    functionsList.style.display = "block";
+                    this.innerHTML = `- ${this.innerHTML.substring(2)}`;
+                } else {
+                    functionsList.style.display = "none";
+                    this.innerHTML = `+ ${this.innerHTML.substring(2)}`;
+                }
+            });
+        });
+
+        // Global Click Event Listener for Toggle
+        document.addEventListener("click", function (event) {
+            if (event.target.closest("svg")) {
+                const listElement = event.target.closest("h3").nextElementSibling;
+                const icon = event.target.closest("svg");
+                if (listElement.style.display === "none" || listElement.style.display === "") {
+                    listElement.style.display = "block";
+                    icon.innerHTML = `<rect x="4" y="11" width="16" height="2" />`; // Minus icon
+                } else {
+                    listElement.style.display = "none";
+                    icon.innerHTML = `<rect x="4" y="11" width="16" height="2" />
+                                     <rect x="11" y="4" width="2" height="16" />`; // Plus icon
+                }
+            }
+        });
+
+
+        function openTab(tabName) {
+            const contents = document.querySelectorAll(".tab-content");
+            contents.forEach(content => content.classList.remove("active"));
+
+            const tabs = document.querySelectorAll(".tab");
+            tabs.forEach(tab => tab.classList.remove("active"));
+
+            document.getElementById(tabName).classList.add("active");
+            document.querySelector(`button[onclick="openTab('${tabName}')"]`).classList.add("active");
+        }
+
+    </script>
+</body>
+</html>

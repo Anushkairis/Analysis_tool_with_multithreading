@@ -1,0 +1,236 @@
+/* General Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    color: #fff;
+    flex-direction: column; /* Adjust for smaller screens */
+    padding: 10px; /* Add padding for smaller screens */
+}
+
+
+h1 {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    color: black;
+    text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.4);
+    animation: typing 4s steps(30, end), blink 0.7s step-end infinite alternate;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+@keyframes typing {
+    from {
+        width: 0;
+    }
+    to {
+        width: 20ch; /* Adjust this value to match the text length */
+    }
+}
+
+@keyframes blink {
+    from {
+        border-color: black;
+    }
+    to {
+        border-color: transparent;
+    }
+}
+
+/* Form Container */
+#fileForm {
+    background-color: gray;
+    backdrop-filter: blur(8px);
+    border-radius: 10px;
+    padding: 40px 30px;
+    width: 90%; /* Full width on smaller screens */
+    max-width: 500px;
+    box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+/* Drop Box */
+#dropBox {
+    width: 100%;
+    height: 150px;
+    border: 3px dashed black;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1rem;
+    color: black;
+    transition: background-color 0.3s, color 0.3s;
+    text-align: center;
+    padding: 20px;
+    margin-bottom: 15px;
+}
+
+#dropBox:hover {
+    background-color: #D3D3D3;
+    color: #333;
+}
+
+/* File Name Display */
+#fileName {
+    font-size: 1.1rem;
+    color: #ddd;
+    margin-bottom: 20px;
+    word-wrap: break-word;
+    text-align: center;
+}
+
+/* Analyze Button */
+#analyzeButton {
+    display: none;
+    width: 100%;
+    padding: 12px 20px;
+    background-color: #5cdb95;
+    color: #16222a;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+#analyzeButton:hover {
+    background-color: #53c68c;
+}
+
+#analyzeButton:active {
+    transform: scale(0.98);
+}
+
+/* Navbar Styles */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #333;
+    padding: 10px 20px;
+    color: white;
+    z-index: 10;
+}
+
+.navbar .logo {
+    font-size: 1.5rem; /* Adjust font size */
+    font-weight: bold; /* Bold text */
+    color: white; /* Text color */
+    text-decoration: none; /* Remove underline */
+  }
+  
+  .navbar a {
+    text-decoration: none; /* Remove underline */
+    color: white; /* Link color */
+  }
+  
+  .navbar .user-icon   {
+    font-size: 1rem;
+    margin-left: 10px; /* Minimal space between Sign in and Sign up */
+    cursor: pointer; /* Pointer cursor for links */
+  }
+  
+  .navbar a:hover {
+    color: #ddd; /* Hover effect */
+  }
+  
+  /* Align Sign in and Sign up links to the right */
+  .navbar a:last-child {
+    margin-right: 0; /* Remove extra space on the last item */
+  }
+  
+  /* Optional: Adjust for smaller screens */
+  @media (max-width: 768px) {
+    .navbar {
+      flex-direction: column; /* Stack items vertically */
+      align-items: flex-start; /* Align to the left */
+    }
+  
+    .navbar a {
+      margin: 5px 0; /* Add space between stacked items */
+    }
+  }
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 2rem;
+    }
+
+    #fileForm {
+        padding: 30px 20px;
+    }
+
+    #dropBox {
+        height: 130px;
+        font-size: 0.9rem;
+    }
+
+    #fileName {
+        font-size: 1rem;
+    }
+
+    #analyzeButton {
+        font-size: 1rem;
+    }
+
+    .navbar .logo {
+        font-size: 20px;
+    }
+
+    .navbar {
+        padding: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    h1 {
+        font-size: 1.8rem;
+    }
+
+    #fileForm {
+        padding: 20px 15px;
+    }
+
+    #dropBox {
+        height: 120px;
+        font-size: 0.85rem;
+    }
+
+    #fileName {
+        font-size: 0.9rem;
+    }
+
+    #analyzeButton {
+        font-size: 0.95rem;
+    }
+
+    .navbar .logo {
+        font-size: 18px;
+    }
+
+    .navbar {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+}

@@ -1,0 +1,14 @@
+Flask
+Flask-SQLAlchemy
+requests
+matplotlib
+numpy
+Werkzeug
+mysql-connector-python
+pefile
+python-magic
+pytesseract
+pyzipper
+Pillow
+joblib
+reportlab

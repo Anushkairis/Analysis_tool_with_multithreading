@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}" />
+</head>
+<body>
+    <div class="container">
+        <!-- Data or Content -->
+        <div class="box-1">
+            <div class="content-holder">
+                <h2>Hello!</h2>
+                <button class="button-1" onclick="signup()">Sign up</button>
+                <button class="button-2" onclick="login()">Login</button>
+            </div>
+        </div>
+
+        <!-- Forms -->
+        <div class="box-2">
+            <!-- Login Form -->
+            <div class="login-form-container">
+                <h1>Login</h1>
+                
+                <!-- Flash Messages for Login -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="alert-container">
+                        {% for category, message in messages %}
+                            {% if 'success' in category or 'error' in category %}
+                                <div class="alert alert-{{ category }}">
+                                    {{ message }}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                {% endwith %}
+
+                <form action="{{ url_for('login') }}" method="POST">
+                    <input type="email" name="email" placeholder="Email" class="input-field" required>
+                    <br><br>
+                    <input type="password" name="password" placeholder="Password" class="input-field" required>
+                    <br><br>
+                    <button class="login-button" type="submit">Login</button>
+                </form>
+            </div>
+
+            <!-- Signup Form -->
+            <div class="signup-form-container" style="display: none;">
+                <h1>Sign Up</h1>
+
+                <!-- Flash Messages for Signup -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="alert-container">
+                        {% for category, message in messages %}
+                            {% if 'success' in category or 'error' in category %}
+                                <div class="alert alert-{{ category }}">
+                                    {{ message }}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                {% endwith %}
+
+                <form action="{{ url_for('signup') }}" method="POST">
+                    <input type="email" name="email" placeholder="Email" class="input-field" required>
+                    <br><br>
+                    <input type="password" name="password" placeholder="Password" class="input-field" required>
+                    <br><br>
+                    <button class="signup-button" type="submit">Sign Up</button>
+                </form>
+            </div>
+        </div>
+    </div>    
+
+    <script>
+        function signup()
+        {
+            document.querySelector(".login-form-container").style.cssText = "display: none;";
+            document.querySelector(".signup-form-container").style.cssText = "display: block;";
+            document.querySelector(".container").style.cssText = "background: linear-gradient(to bottom, rgb(56, 189, 149),  rgb(28, 139, 106));";
+            document.querySelector(".button-1").style.cssText = "display: none";
+            document.querySelector(".button-2").style.cssText = "display: block";
+
+        };
+
+        function login()
+        {
+            document.querySelector(".signup-form-container").style.cssText = "display: none;";
+            document.querySelector(".login-form-container").style.cssText = "display: block;";
+            document.querySelector(".container").style.cssText = "background: linear-gradient(to bottom, rgb(6, 108, 224),  rgb(14, 48, 122));";
+            document.querySelector(".button-2").style.cssText = "display: none";
+            document.querySelector(".button-1").style.cssText = "display: block";
+
+        }
+
+        // Hide flash messages after 5 seconds
+        setTimeout(function() {
+            document.querySelectorAll(".alert").forEach(function(alert) {
+                alert.style.opacity = 0;
+                setTimeout(function() {
+                    alert.style.display = "none";
+                }, 1000);
+            });
+        }, 5000);
+    </script>
+
+</body>
+</html>
