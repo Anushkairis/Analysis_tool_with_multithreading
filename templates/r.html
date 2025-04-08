@@ -306,11 +306,6 @@
                                 </svg>
                             </h3>
                             <ul id="malicious-strings-list" style="display: none;">
-                                <div id="loadingMaliciousIndicators" class="loading-spinner" style="display: none;">
-                                    <img src="/static/loading.gif" alt="Loading...">
-                                </div>
-                                <li></li>
-                            
                             </ul>
 
                             <h3 id="malicious-apis-header">
@@ -375,10 +370,6 @@
                         download>
                         Download ZIP
                     </a>
-                    <!-- {% if zip_download_link %}
-                        <a href="{{ zip_download_link }}" class="btn btn-primary">Download Extracted Resources (ZIP)</a>
-                    {% endif %} -->
-
                 </div>
                 
                 <hr>
@@ -504,7 +495,7 @@
                     updateTridAnalysis(data.trid);
                     updateStrings(data);
                     updateHighEntropySections(data.high_entropy_sections);
-                    updateExtractedResources(data.extracted_resources);
+                    updateExtractedResources(data.resource_details);
                     updateMetadata(data.metadata);
                     updateAttackTactics(data.tactics_techniques);
                     updateMBCData(data.mbc_data);
@@ -642,23 +633,115 @@
             };
 
             const populateMaliciousIndicators = (data) => {
+                console.log("[DEBUG] Starting to populate malicious indicators...");
                 showLoading("loadingMaliciousIndicators");
 
                 setTimeout(() => {
                     hideLoading("loadingMaliciousIndicators");
+                    console.log("[DEBUG] Data received from backend:", data);
 
                     const sections = [
-                        { key: "malicious_strings", listId: "malicious-strings-list" },
-                        { key: "malicious_apis", listId: "malicious-api-list" },
-                        { key: "emails_found", listId: "malicious-emails-list" },
-                        { key: "urls_found", listId: "malicious-url-list" }
+                        { key: "malicious_strings", listId: "malicious-strings-list", headerId: "malicious-strings-header" },
+                        { key: "malicious_apis", listId: "malicious-api-list", headerId: "malicious-apis-header" },
+                        { key: "emails_found", listId: "malicious-emails-list", headerId: "malicious-emails-header" },
+                        { key: "urls_found", listId: "malicious-url-list", headerId: "malicious-urls-header" }
                     ];
+
                     sections.forEach(section => {
-                        const listElement = document.getElementById(section.listId);
-                        listElement.innerHTML = data[section.key]?.length ? data[section.key].map(item => `<li>${item}</li>`).join('') : "<li>No data found</li>";
+                        const content = data[section.key];
+                        const list = document.getElementById(section.listId);
+                        const header = document.getElementById(section.headerId);
+
+                        if (!list || !header) {
+                            console.warn(`[WARN] Missing DOM element for ${section.key}`);
+                            return;
+                        }
+
+                        // Clear previous contents
+                        list.innerHTML = "";
+
+                        if (Array.isArray(content)) {
+                            content.forEach(item => {
+                                const li = document.createElement("li");
+                                li.textContent = item;
+                                list.appendChild(li);
+                            });
+                        } else if (typeof content === 'object' && content !== null) {
+                            for (const [key, value] of Object.entries(content)) {
+                                const li = document.createElement("li");
+                                li.textContent = `${key}: ${value}`;
+                                list.appendChild(li);
+                            }
+                        } else {
+                            const li = document.createElement("li");
+                            li.textContent = "No data found.";
+                            list.appendChild(li);
+                        }
+
+                        // // Toggle functionality
+                        // header.addEventListener("click", () => {
+                        //     const isHidden = list.style.display === "none";
+                        //     list.style.display = isHidden ? "block" : "none";
+                        //     console.log(`[INFO] Toggled ${section.key} to`, isHidden ? "show" : "hide");
+                        // });
+
+                        // // Ensure initially hidden sections are displayed
+                        // list.style.display = "block";
                     });
+
+                    console.log("[DEBUG] Malicious indicators populated successfully.");
                 }, 1000);
             };
+
+
+            // const populateMaliciousIndicators = (data) => {
+            //     showLoading("loadingMaliciousIndicators");
+
+            //     setTimeout(() => {
+            //         hideLoading("loadingMaliciousIndicators");
+
+            //         const sections = [
+            //             { key: "malicious_strings", listId: "malicious-strings-list" },
+            //             { key: "malicious_apis", listId: "malicious-api-list" },
+            //             { key: "emails_found", listId: "malicious-emails-list" },
+            //             { key: "urls_found", listId: "malicious-url-list" }
+            //         ];
+
+            //         sections.forEach(section => {
+            //             const key = document.getElementById(section.key);
+            //             const list = document.getElementById(section.listId);
+
+            //             header.addEventListener("click", () => {
+            //                 list.style.display = list.style.display === "none" ? "block" : "none";
+            //             });
+            //         });
+            //     }, 1000);
+            // };
+
+
+            // const populateMaliciousIndicators = (data) => {
+            //     showLoading("loadingMaliciousIndicators");
+
+            //     setTimeout(() => {
+            //         hideLoading("loadingMaliciousIndicators");
+
+            //         const sections = [
+            //             { key: "malicious_strings", listId: "malicious-strings-list" },
+            //             { key: "malicious_apis", listId: "malicious-api-list" },
+            //             { key: "emails_found", listId: "malicious-emails-list" },
+            //             { key: "urls_found", listId: "malicious-url-list" }
+            //         ];
+            //         sections.forEach(section => {
+            //             // console.log("malicious_strings from backend:", data.malicious_strings);
+            //             console.log("malicious_strings:", data.malicious_strings, Array.isArray(data.malicious_strings));
+
+            //             const listElement = document.getElementById(section.listId);
+            //             listElement.innerHTML = data[section.key]?.length ? data[section.key].map(item => `<li>${item}</li>`).join('') : "<li>No data found</li>";
+            //             console.log(`Section: ${section.key}, Values:`, data[section.key]);
+
+            //         });
+            //     }, 1000);
+            // };
 
             const updateTridAnalysis = (trid) => {
                 showLoading("loadingTridAnalysis");
@@ -680,7 +763,13 @@
                         document.querySelector("#ascii ul").innerHTML = data.ascii_strings.map(str => `<li>${str}</li>`).join('');
                     }
                     if (data.wide_strings) {
-                        document.querySelector("#wide ul").innerHTML = data.wide_strings.map(str => `<li>${str.decrypted || str.encrypted}</li>`).join('');
+                        document.querySelector("#wide ul").innerHTML = data.wide_strings.map(str => {
+                            const decrypted = str.decrypted ? `<strong>Decrypted:</strong> ${str.decrypted}` : `<em>Decrypted:</em> Not available`;
+                            return `<li>
+                                        <strong>Encrypted:</strong> ${str.encrypted}<br/>
+                                        ${decrypted}
+                                    </li>`;
+                        }).join('');
                     }
                     if (data.ranked_strings) {
                         document.querySelector("#rankedStrings ul").innerHTML = data.ranked_strings.map(([string, score]) =>
@@ -712,11 +801,11 @@
                     const tableBody = document.querySelector(".resource-table tbody");
                     tableBody.innerHTML = resources.map(resource => `
                         <tr>
-                            <td>${resource.type || "Unknown"}</td>
-                            <td>${resource.size} KB</td>
-                            <td>${resource.filename || "N/A"}</td>
-                            <td>${resource.extracted_text || "N/A"}</td>
-                            <td><pre>${resource.raw_content || "N/A"}</pre></td>
+                            <td>${resource.type}</td>
+                            <td>${resource.size} bytes</td>
+                            <td>${resource.filename}</td>
+                            <td>${resource.extracted_text || '—'}</td>
+                            <td>${resource.raw_content || '—'}</td>
                         </tr>
                     `).join('');
                 }, 1000);

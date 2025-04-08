@@ -54,7 +54,7 @@ os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 BASE_OUTPUT_FOLDER = "extracted_resources"
 os.makedirs(BASE_OUTPUT_FOLDER, exist_ok=True)
 
-trid_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "trid_w32", "trid.exe","trid"))
+trid_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "trid_w32", "trid"))
 
 VIRUSTOTAL_API_KEY = "952bda09ecef7bf22c9a8c9b7dff66701109ef5b8dd5ec33307c193b056538bc"
 
@@ -183,7 +183,7 @@ def check_status(session_id):
             "section_headers", "import_table", "export_table",
             "malicious_strings", "malicious_apis", "emails_found", "urls_found",
             "trid", "ascii_strings", "wide_strings", "ranked_strings",
-            "high_entropy_sections", "extracted_resources",
+            "high_entropy_sections", "resource_details",
             "metadata", "tactics_techniques", "mbc_data", "capability_namespace"
         ]
 
@@ -458,14 +458,14 @@ def perform_analysis(file_path, session_id):
         # Call malicious indicator detection
         malicious_strings, malicious_apis, emails, urls = check_for_malicious_indicators(ascii_strings + wide_strings, import_table)
 
-        # print(f"[DEBUG] Found {len(malicious_strings)} malicious string matches.")
-        # print(f"[DEBUG] Found {len(malicious_apis)} malicious API matches.")
-        # print(f"[DEBUG] Found {len(emails)} email addresses.")
-        # print(f"[DEBUG] Found {len(urls)} URLs.")
+        # print(f"[DEBUG] Found {(malicious_strings)} malicious string matches.")
+        # print(f"[DEBUG] Found {(malicious_apis)} malicious API matches.")
+        # print(f"[DEBUG] Found {(emails)} email addresses.")
+        # print(f"[DEBUG] Found {(urls)} URLs.")
 
         # Store results in the session
-        update_analysis_result(session_id, "ascii_strings", ascii_strings[:20])
-        update_analysis_result(session_id, "wide_strings", processed_wide_strings[:20])
+        update_analysis_result(session_id, "ascii_strings", ascii_strings)
+        update_analysis_result(session_id, "wide_strings", processed_wide_strings)
         update_analysis_result(session_id, "section_headers", section_headers)
         update_analysis_result(session_id, "high_entropy_sections", high_entropy)
         update_analysis_result(session_id, "import_table", import_table)
@@ -719,11 +719,50 @@ def extract_resources_async(file_path, session_id):
         os.makedirs(output_folder, exist_ok=True) 
 
         extracted_resources = extract_from_rsrc(pe, output_folder)
+        resource_data_list = []
 
-        update_analysis_result(session_id, "extracted_resources", extracted_resources)
+        for file_path in extracted_resources:
+            file_info = {
+                "filename": os.path.basename(file_path),
+                "type": detect_file_type(file_path),
+                "size": os.path.getsize(file_path),
+                "extracted_text": "",
+                "raw_content": ""
+            }
+
+            if file_info["type"].startswith("image/"):
+                file_info["extracted_text"] = perform_ocr(file_path)
+            else:
+                file_info["raw_content"] = read_raw_content(file_path)
+
+            resource_data_list.append(file_info)
+
+        # Now send this list to frontend via API or store in DB if async
+        update_analysis_result(session_id, "resource_details", resource_data_list)
+
+        # for file_path in extracted_resources:
+        #     # print(f"\nFile: {os.path.basename(file_path)}")
+
+        #     file_type = detect_file_type(file_path)
+        #     # print(f"Type: {file_type}")
+
+        #     file_size = os.path.getsize(file_path)
+        #     # print(f"Size: {file_size} bytes")
+
+        #     if file_type.startswith("image/"):
+        #         # print("Performing OCR...")
+        #         extracted_text = perform_ocr(file_path)
+        #         # print(f"Extracted Text: {extracted_text}")
+        #     else:
+        #         # print("Analyzing raw content...")
+        #         raw_content = read_raw_content(file_path)
+        #         # print(f"Raw Content: {raw_content}")
+
+
+        # update_analysis_result(session_id, "extracted_resources", extracted_resources)
 
         # ✅ Call create_protected_zip synchronously
-        zip_password = "SecurePass123"  # Set password dynamically if needed
+        zip_password = "mypassword"  # Set password dynamically if needed
         zip_name = create_protected_zip(output_folder, zip_password, None)
 
         if zip_name:
@@ -770,50 +809,75 @@ def extract_from_rsrc(pe, output_folder):
     if not hasattr(pe, 'DIRECTORY_ENTRY_RESOURCE'):
         print("[DEBUG] No resource directory found in the PE file.")
         return None, extracted_resources
-
+    
     for entry in pe.DIRECTORY_ENTRY_RESOURCE.entries:
         if hasattr(entry, 'directory'):
             for resource in entry.directory.entries:
                 if hasattr(resource, 'directory'):
-                    for res_entry in resource.directory.entries:
-                        try:
-                            data_rva = res_entry.data.struct.OffsetToData
-                            size = res_entry.data.struct.Size
-                            resource_data = pe.get_memory_mapped_image()[data_rva:data_rva + size]
+                    for entry in resource.directory.entries:
+                        data_rva = entry.data.struct.OffsetToData
+                        size = entry.data.struct.Size
+                        resource_data = pe.get_memory_mapped_image()[data_rva:data_rva + size]
 
-                            file_extension = ''
-                            if res_entry.name is not None:
-                                resource_name = res_entry.name.string.decode('utf-8', errors='ignore')
-                                if 'PNG' in resource_name:
-                                    file_extension = '.png'
-                                elif 'JPEG' in resource_name or 'JPG' in resource_name:
-                                    file_extension = '.jpg'
-                                elif 'PDF' in resource_name:
-                                    file_extension = '.pdf'
-                                elif 'TXT' in resource_name:
-                                    file_extension = '.txt'
+                        # Guess the file extension based on resource type
+                        file_extension = ''
+                        if entry.name is not None:
+                            resource_name = entry.name.string.decode('utf-8', errors='ignore')
+                            if 'PNG' in resource_name:
+                                file_extension = '.png'
+                            elif 'JPEG' in resource_name or 'JPG' in resource_name:
+                                file_extension = '.jpg'
+                            elif 'PDF' in resource_name:
+                                file_extension = '.pdf'
+                            elif 'TXT' in resource_name:
+                                file_extension = '.txt'
 
-                            file_path = save_resource(resource_data, output_folder, file_extension)
+                        file_path = save_resource(resource_data, output_folder, file_extension)
+                        extracted_resources.append(file_path)
 
-                            if file_path:
-                                file_size = os.path.getsize(file_path)
-                                file_type = detect_file_type(file_path)  # ✅ Detect file type
-                                extracted_text = perform_ocr(file_path) if file_type.startswith("image") else "N/A"  # ✅ OCR if image
-                                raw_content = read_raw_content(file_path)  # ✅ Read raw content
+    # for entry in pe.DIRECTORY_ENTRY_RESOURCE.entries:
+    #     if hasattr(entry, 'directory'):
+    #         for resource in entry.directory.entries:
+    #             if hasattr(resource, 'directory'):
+    #                 for res_entry in resource.directory.entries:
+    #                     try:
+    #                         data_rva = res_entry.data.struct.OffsetToData
+    #                         size = res_entry.data.struct.Size
+    #                         resource_data = pe.get_memory_mapped_image()[data_rva:data_rva + size]
 
-                                extracted_resources.append({
-                                    "filename": os.path.basename(file_path),
-                                    "size": file_size,
-                                    "type": file_type,
-                                    "details": resource_name if res_entry.name else "N/A",
-                                    "extracted_text": extracted_text,
-                                    "raw_content": raw_content
-                                })
-                            else:
-                                print(f"[ERROR] Failed to save extracted resource.")
+    #                         file_extension = ''
+    #                         if res_entry.name is not None:
+    #                             resource_name = res_entry.name.string.decode('utf-8', errors='ignore')
+    #                             if 'PNG' in resource_name:
+    #                                 file_extension = '.png'
+    #                             elif 'JPEG' in resource_name or 'JPG' in resource_name:
+    #                                 file_extension = '.jpg'
+    #                             elif 'PDF' in resource_name:
+    #                                 file_extension = '.pdf'
+    #                             elif 'TXT' in resource_name:
+    #                                 file_extension = '.txt'
 
-                        except Exception as e:
-                            print(f"[ERROR] Error extracting resource: {e}")
+    #                         file_path = save_resource(resource_data, output_folder, file_extension)
+
+    #                         if file_path:
+    #                             file_size = os.path.getsize(file_path)
+    #                             file_type = detect_file_type(file_path)  # ✅ Detect file type
+    #                             extracted_text = perform_ocr(image_path)# ✅ OCR if image
+    #                             raw_content = read_raw_content(file_path)  # ✅ Read raw content
+
+    #                             extracted_resources.append({
+    #                                 "filename": os.path.basename(file_path),
+    #                                 "size": file_size,
+    #                                 "type": file_type,
+    #                                 "details": resource_name if res_entry.name else "N/A",
+    #                                 "extracted_text": extracted_text,
+    #                                 "raw_content": raw_content
+    #                             })
+    #                         else:
+    #                             print(f"[ERROR] Failed to save extracted resource.")
+
+    #                     except Exception as e:
+    #                         print(f"[ERROR] Error extracting resource: {e}")
 
     return  extracted_resources
 
@@ -930,7 +994,7 @@ def run_capa_analysis(file_path, session_id):
     metadata = extract_metadata(formatted_data)
     tactics_techniques = extract_attack_tactics_techniques(formatted_data)
     mbc_data = extract_mbc(formatted_data)
-    capability_namespace_data = extract_capability_namespace(formatted_data)
+    capability_data= extract_capability_namespace(formatted_data)
     
     # print("Extracted Metadata:", metadata)
     # print("Extracted Attack Tactics & Techniques:", tactics_techniques)
@@ -940,7 +1004,7 @@ def run_capa_analysis(file_path, session_id):
     update_analysis_result(session_id, "metadata", metadata)
     update_analysis_result(session_id, "tactics_techniques", tactics_techniques)
     update_analysis_result(session_id, "mbc_data", mbc_data)
-    update_analysis_result(session_id, "capability_namespace", capability_namespace_data)
+    update_analysis_result(session_id, "capability_namespace", capability_data)
 
 def run_capa_terminal(file_path, rules_path, signatures_path):
     """
@@ -1109,12 +1173,15 @@ def extract_attack_tactics_techniques(formatted_data):
 
 def extract_mbc(formatted_data):
     mbc_data = []
-    mbc_section_started = False  
-    mbc_pattern = re.compile(r"^([A-Z\s\-]+?)\s*-\s*(.+)$")
-    
+    mbc_section_started = False  # Track if we're in the MBC section
+
+    # Regex to match "MBC Objective - MBC Behavior (ID)"
+    mbc_pattern = re.compile(r"^([A-Z\s\-]+?)\s*-\s*(.+?)(?:\s*\(([^)]+)\))?$")
+
+    # Split into lines if input is a single string
     if isinstance(formatted_data, str):
         formatted_data = formatted_data.splitlines()
-    
+
     conn = connect_db()  # Establish database connection
     if conn:
         cursor = conn.cursor(dictionary=True)
@@ -1124,29 +1191,30 @@ def extract_mbc(formatted_data):
         db_results = {row["id"]: row["value"] for row in cursor.fetchall()} 
         
         # Behavior ID pattern to match different formats
-        behavior_id_pattern = re.compile(r"\b([A-Z]\d{4}(?:\.\d{3,4}|\.m\d{2,3})?)\b")
+        behavior_id_pattern = re.compile(r"\b([A-Z]\d{4}(?:\.\d{3,4}|\.m\d{2,3})?)\b")    
 
-        for line in formatted_data:
-            line = line.strip()
-            
-            if "MBC Objective - MBC Behavior" in line:
-                mbc_section_started = True
-                continue 
-            
-            if mbc_section_started:
-                if not line or "ATT&CK" in line or "-" not in line:
-                    break
-                
-                match = mbc_pattern.match(line)
-                if match:
-                    objective = match.group(1).strip()
-                    behavior = match.group(2).strip()
+    for line in formatted_data:
+        line = line.strip()  # Remove leading/trailing spaces
 
-                    # Find all matching behavior IDs in the behavior description
-                    behavior_ids = behavior_id_pattern.findall(behavior)
+        # Start processing when the "MBC Objective" section header is found
+        if "MBC Objective" in line:
+            mbc_section_started = True
+            continue  # Skip header line
+        
+        if mbc_section_started:
+            # Stop processing when an unrelated section starts
+            if not line or "ATT&CK" in line or "-" not in line:
+                break
+
+            match = mbc_pattern.match(line)
+            if match:
+                objective = match.group(1).strip()  
+                behavior = match.group(2).strip() 
+                # Find all matching behavior IDs in the behavior description
+                behavior_ids = behavior_id_pattern.findall(behavior)
                     
-                    if behavior_ids:
-                        for behavior_id in behavior_ids:
+                if behavior_ids:
+                    for behavior_id in behavior_ids:
                             if behavior_id in db_results:
                                 behavior_link = db_results[behavior_id]
                                 behavior = behavior.replace(
@@ -1161,41 +1229,132 @@ def extract_mbc(formatted_data):
         cursor.close()
         conn.close()
     
-    # print("Final extracted MBC behaviors:", mbc_data)
     return mbc_data
+            
 
 def extract_capability_namespace(formatted_data):
-    # print("Extracting capability namespaces...")
-    capability_namespace_data = []
-    capability_namespace_pattern = re.compile(r"(.+?)\s*-\s*(.+)")
+    capability_data = []
+    capability_section_started = False  
+
+    # Define a more flexible regex pattern to match "Capability - Description"
+    capability_pattern = re.compile(r"^([a-zA-Z0-9\s\-\(\)\/]+)\s*-\s*(.+)$")
     
+    # Split the formatted_data into lines if it's a single string
     if isinstance(formatted_data, str):
         formatted_data = formatted_data.splitlines()
-    
-    capability_section = False  
-    
+
     for line in formatted_data:
-        line = line.strip() 
-        # print(f"Processing line: {line}")
+        line = line.strip()  
+
+        # Start processing when the "Capability" section header is found
+        if "Capability" in line:
+            capability_section_started = True
+            continue  # Skip the header line itself
         
-        if line.startswith("Capability - Namespace"):
-            capability_section = True
-            # print("Capability section started...")
-            continue  
-        
-        if capability_section:
-            if not line or "-" not in line:
+        # If in the Capability section, process the lines
+        if capability_section_started:
+            # Stop processing when an unrelated section starts (e.g., MBC or ATT&CK section, or empty line)
+            if not line or "MBC" in line or "ATT&CK" in line:
                 break
             
-            match = capability_namespace_pattern.match(line)
+            # Match lines with "Capability - Description" structure
+            match = capability_pattern.match(line)
             if match:
-                capability = match.group(1).strip()  
-                namespace = match.group(2).strip() 
-                capability_namespace_data.append((capability, namespace))
-                # print(f"Extracted: {capability} -> {namespace}")
+                capability = match.group(1).strip()  # Extract Capability
+                description = match.group(2).strip()  # Extract Description
+                capability_data.append((capability, description))
+
+    return capability_data
+
+# def extract_mbc(formatted_data):
+#     mbc_data = []
+#     mbc_section_started = False  
+#     mbc_pattern = re.compile(r"^([A-Z\s\-]+?)\s*-\s*(.+)$")
     
-    # print("Final extracted capability namespaces:", capability_namespace_data)
-    return capability_namespace_data
+#     if isinstance(formatted_data, str):
+#         formatted_data = formatted_data.splitlines()
+    
+#     conn = connect_db()  # Establish database connection
+#     if conn:
+#         cursor = conn.cursor(dictionary=True)
+        
+#         # Fetch all behavior IDs and links from the database in one query
+#         cursor.execute("SELECT id, value FROM mbc_link")
+#         db_results = {row["id"]: row["value"] for row in cursor.fetchall()} 
+        
+#         # Behavior ID pattern to match different formats
+#         behavior_id_pattern = re.compile(r"\b([A-Z]\d{4}(?:\.\d{3,4}|\.m\d{2,3})?)\b")
+
+#         for line in formatted_data:
+#             line = line.strip()
+            
+#             if "MBC Objective - MBC Behavior" in line:
+#                 mbc_section_started = True
+#                 continue 
+            
+#             if mbc_section_started:
+#                 if not line or "ATT&CK" in line or "-" not in line:
+#                     break
+                
+#                 match = mbc_pattern.match(line)
+#                 if match:
+#                     objective = match.group(1).strip()
+#                     behavior = match.group(2).strip()
+
+#                     # Find all matching behavior IDs in the behavior description
+#                     behavior_ids = behavior_id_pattern.findall(behavior)
+                    
+#                     if behavior_ids:
+#                         for behavior_id in behavior_ids:
+#                             if behavior_id in db_results:
+#                                 behavior_link = db_results[behavior_id]
+#                                 behavior = behavior.replace(
+#                                     behavior_id,
+#                                     f'<a href="{behavior_link}" target="_blank">{behavior_id}</a>'
+#                                 )
+#                             else:
+#                                 print(f"Behavior ID {behavior_id} not found in database, keeping original.")
+                    
+#                     mbc_data.append((objective, behavior))
+        
+#         cursor.close()
+#         conn.close()
+    
+#     # print("Final extracted MBC behaviors:", mbc_data)
+#     return mbc_data
+
+# def extract_capability_namespace(formatted_data):
+#     # print("Extracting capability namespaces...")
+#     capability_namespace_data = []
+#     capability_namespace_pattern = re.compile(r"(.+?)\s*-\s*(.+)")
+    
+#     if isinstance(formatted_data, str):
+#         formatted_data = formatted_data.splitlines()
+    
+#     capability_section = False  
+    
+#     for line in formatted_data:
+#         line = line.strip() 
+#         # print(f"Processing line: {line}")
+        
+#         if line.startswith("Capability - Namespace"):
+#             capability_section = True
+#             # print("Capability section started...")
+#             continue  
+        
+#         if capability_section:
+#             if not line or "-" not in line:
+#                 break
+            
+#             match = capability_namespace_pattern.match(line)
+#             if match:
+#                 capability = match.group(1).strip()  
+#                 namespace = match.group(2).strip() 
+#                 capability_namespace_data.append((capability, namespace))
+#                 # print(f"Extracted: {capability} -> {namespace}")
+    
+#     # print("Final extracted capability namespaces:", capability_namespace_data)
+#     return capability_namespace_data
 
 
 
@@ -1347,11 +1506,10 @@ def upload_file(session_id):
 
 # ✅ LOGOUT Route
 @app.route("/logout")
-@prevent_navigation_to_restricted_routes
 def logout():
     session.clear()
     flash("You have been logged out successfully.", "success")
     return redirect(url_for("landing_page"))
 
 if __name__ == '__main__':      
-    app.run(host="0.0.0.0", port=8080, debug=True)
+    app.run(host="0.0.0.0", port=8000, debug=True)

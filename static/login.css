@@ -13,8 +13,8 @@
     grid-template-columns: 1fr 2fr;
     background-color: red;
     background: linear-gradient(to bottom, rgb(6, 108, 100),  rgb(14, 48, 122));
-    width: 800px;
-    height: 400px;
+    width: 866px;
+    height: 495px;
     margin: 10% auto;;
     border-radius: 5px;
   }
@@ -62,7 +62,7 @@
   .login-form-container
   {
     text-align: center;
-    margin-top: 10%;
+    margin-top: 13%;
   
   }
   
