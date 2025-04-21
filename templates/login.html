@@ -65,10 +65,26 @@
                 {% endwith %}
 
                 <form action="{{ url_for('signup') }}" method="POST">
-                    <input type="email" name="email" placeholder="Email" class="input-field" required>
+                    <!-- <input type="email" name="email" placeholder="Email" class="input-field" required>
                     <br><br>
                     <input type="password" name="password" placeholder="Password" class="input-field" required>
                     <br><br>
+                    <button class="signup-button" type="submit">Sign Up</button> -->
+                    <input type="email" name="email" placeholder="Email" class="input-field" required>
+                    <br><br>
+                    
+                    <!-- Password Field with Toggle Button -->
+                    <div class="password-container" style="position: relative;">
+                        <input type="password" name="password" placeholder="Password" class="input-field" required>
+                        <button type="button" id="toggle-password" style="position: absolute; top: 50%; right: 10px; transform: translateY(-50%); background: none; border: none; cursor: pointer;">
+                            <!-- Lock icon by default -->
+                            <svg xmlns="http://www.w3.org/2000/svg" id="lock-icon" width="16" height="16" fill="currentColor" class="bi bi-lock" viewBox="0 0 16 16">
+                                <path d="M11 1a2 2 0 0 0-2 2v4a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h5V3a3 3 0 0 1 6 0v4a.5.5 0 0 1-1 0V3a2 2 0 0 0-2-2M3 8a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1z"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <br><br>
+                    
                     <button class="signup-button" type="submit">Sign Up</button>
                 </form>
             </div>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>File Upload and Analysis</title>
+    <title>Static Analysis Tool</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='upload.css') }}?v={{ time }}"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <style>
@@ -16,9 +16,15 @@
 <body>
     <div class="navbar">
         <span class="logo">Static Analysis Tool</span>
-        <a href="{{ url_for('logout') }}">
-            <div class="user-icon">Logout</div>
-        </a>
+        <!-- <a href="{{ url_for('logout') }}">
+            <div class="user-icon btn btn-outline-danger d-flex justify-content-center align-items-center">Logout</div>
+        </a> -->
+        <form action="/logout" method="POST" class="d-inline">
+            <!-- Button for logout -->
+            <button type="submit" class="btn btn-outline-danger user-icon d-flex justify-content-center align-items-center">
+              Logout
+            </button>
+          </form>
     </div>
 
     <h1>Upload File for Analysis</h1>
@@ -104,6 +110,5 @@
             });
         });
     </script>
-    
 </body>
 </html>

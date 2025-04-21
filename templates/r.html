@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analysis Results</title>
+    <title>Static Analysis Tool</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <link rel="stylesheet" href="{{ url_for('static', filename='result.css') }}" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
@@ -16,14 +16,19 @@
     <!-- Responsive Navbar -->
     <div class="navbar">
         <a class="logo">Static Analysis Tool</a>
-        <a href="{{ url_for('logout') }}">
-            <div class="user-icon">Logout</div>
-        </a>
+    <form action="/logout" method="POST" class="d-inline">
+        <!-- Button for logout -->
+        <button type="submit" class="btn btn-outline-danger user-icon d-flex justify-content-center align-items-center">
+        Logout
+        </button>
+    </form>
     </div>
     <div id="resultsContainer">
         
         <div class="container3">
             <h1 id="info-page">Results</h1>
+            <div id="fetching-message" style="color: blue; font-weight: bold;">Fetching data, please wait...</div>
+            <div id="error-message" style="display: none;"></div>
         </div>
 
         <div class="row1">
@@ -39,16 +44,12 @@
                             <tr>
                                 <th>Filename</th>
                                 
-                                <td id="filename"><div id="loadingFileDetails" class="loading-spinner" style="display: none;">
-                                    <img src="/static/loading.gif" alt="Loading...">
-                                </div></td>
+                                <td id="filename"></td>
                             </tr>
                             <tr>
                                 <th>File Size</th>
                                 
-                                <td id="fileSize"><div id="loadingFileDetails" class="loading-spinner" style="display: none;">
-                                    <img src="/static/loading.gif" alt="Loading...">
-                                </div></td>
+                                <td id="fileSize"></td>
                             </tr>
                             <tr>
                                 <th>Compiler</th>
@@ -64,44 +65,32 @@
                             <tr>
                                 <th>SHA1</th>
                                
-                                <td id= "sha1"> <div id="loadingMetadata" class="loading-spinner" style="display: none;">
-                                    <img src="/static/loading.gif" alt="Loading...">
-                                </div></td>
+                                <td id= "sha1"> </td>
                             </tr>
                             <tr>
                                 <th>SHA256</th>
                                 
-                                <td id= "sha256"><div id="loadingMetadata" class="loading-spinner" style="display: none;">
-                                    <img src="/static/loading.gif" alt="Loading...">
-                                </div></td>
+                                <td id= "sha256"></td>
                             </tr>
                             <tr>
                                 <th>Analysis</th>
                                 
-                                <td id= "analysis"><div id="loadingMetadata" class="loading-spinner" style="display: none;">
-                                    <img src="/static/loading.gif" alt="Loading...">
-                                </div></td>
+                                <td id= "analysis"></td>
                             </tr>
                             <tr>
                                 <th>Operating System</th>
                                 
-                                <td id= "operatingSystem"><div id="loadingMetadata" class="loading-spinner" style="display: none;">
-                                    <img src="/static/loading.gif" alt="Loading...">
-                                </div></td>
+                                <td id= "operatingSystem"></td>
                             </tr>
                             <tr>
                                 <th>Format</th>
                                
-                                <td id= "format"> <div id="loadingMetadata" class="loading-spinner" style="display: none;">
-                                    <img src="/static/loading.gif" alt="Loading...">
-                                </div></td>
+                                <td id= "format"> </td>
                             </tr>
                             <tr>
                                 <th>Architecture</th>
                                
-                                <td id= "architecture">  <div id="loadingMetadata" class="loading-spinner" style="display: none;">
-                                    <img src="/static/loading.gif" alt="Loading...">
-                                </div></td>
+                                <td id= "architecture">  </td>
                             </tr>
                         </table>
                     </div>
@@ -112,9 +101,7 @@
                     </div>
                     <table class="vt-table">
                         <tbody>
-                            <div id="loadingChartResults" class="loading-spinner" style="display: none;">
-                                <img src="/static/loading.gif" alt="Loading...">
-                            </div>
+                           
                             <tr>
                                 <td>
                                    
@@ -157,9 +144,7 @@
                     <div class="card-trid">
                         <h2>TrID Analysis</h2>
                         <hr>
-                        <pre><div id="loadingTridAnalysis" class="loading-spinner" style="display: none;">
-                            <img src="/static/loading.gif" alt="Loading...">
-                        </div></pre>
+                        <pre></pre>
                     </div>
 
                     <div class="card">
@@ -174,38 +159,49 @@
                                 <h3>ATT&CK Tactics and Techniques</h3>
                                 
                                 <ul id="attack-tactics">
-                                    <div id="loadingAttackTactics" class="loading-spinner" style="display: none;">
-                                        <img src="/static/loading.gif" alt="Loading...">
+                                    <div class="d-flex justify-content-center my-2" id="spinner-attack">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
                                     </div>
-                                    <li><strong> </strong></li>
-                                    
                                 </ul>
+                                
                                 
                             </div>
 
                             <div class="card-section">
                                 <hr>
                                 <h3>MBC Objective and Behaviour</h3>
-                                <div id="loadingMBCData" class="loading-spinner" style="display: none;">
-                                    <img src="/static/loading.gif" alt="Loading...">
-                                </div>
+<!--                                 
                                 <ul id="mbc-data">
                                    
                                     <li><strong></strong></li>
                                    
+                                </ul> -->
+                                <ul id="mbc-data">
+                                    <div class="d-flex justify-content-center my-2" id="spinner-mbc">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                    </div>
                                 </ul>
+                                
                                
                             </div>
 
                             <div class="card-section">
                                 <hr>
                                 <h3>Namespace and Capability</h3>
-                                <div id="loadingNamespaceCapabilities" class="loading-spinner" style="display: none;">
-                                    <img src="/static/loading.gif" alt="Loading...">
-                                </div>
-                                <ul id="namespace-capabilities">
+                                <!-- <ul id="namespace-capabilities">
                                    
                                     <li><strong></strong></li>
+                                </ul> -->
+                                <ul id="namespace-capabilities">
+                                    <div class="d-flex justify-content-center my-2" id="spinner-namespace">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                    </div>
                                 </ul>
                                 
                             </div>
@@ -241,9 +237,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <div id="loadingSectionHeaders" class="loading-spinner" style="display: none;">
-                                        <img src="/static/loading.gif" alt="Loading...">
-                                    </div>
+                                   
                                 </tbody>
                             </table>
                         </div>
@@ -261,9 +255,7 @@
                                 <tbody>
                                     
                                     <tr>
-                                        <td id="loadingEntropy" class="loading-spinner" style="display: none;">
-                                            <img src="/static/loading.gif" alt="Loading...">
-                                        </td>
+                                        
                                     </tr>
 
                                 </tbody>
@@ -283,9 +275,7 @@
                                 <tbody>
                                     
                                     <tr>
-                                        <td id="loadingExportTable" class="loading-spinner" style="display: none;">
-                                            <img src="/static/loading.gif" alt="Loading...">
-                                        </td>
+                                       
                                     </tr>
 
                                 </tbody>
@@ -306,6 +296,9 @@
                                 </svg>
                             </h3>
                             <ul id="malicious-strings-list" style="display: none;">
+                                
+                                <li></li>
+                            
                             </ul>
 
                             <h3 id="malicious-apis-header">
@@ -317,9 +310,7 @@
                                 </svg>
                             </h3>
                             <ul id="malicious-api-list" style="display: none;">
-                                <div id="loadingMaliciousIndicators" class="loading-spinner" style="display: none;">
-                                    <img src="/static/loading.gif" alt="Loading...">
-                                </div>
+                                
                                 <li></li>
 
                             </ul>
@@ -333,9 +324,7 @@
                                 </svg>
                             </h3>
                             <ul id="malicious-emails-list" style="display: none;">
-                                <div id="loadingMaliciousIndicators" class="loading-spinner" style="display: none;">
-                                    <img src="/static/loading.gif" alt="Loading...">
-                                </div>
+                               
                                 <li></li>
 
                             </ul>
@@ -349,9 +338,7 @@
                                 </svg>
                             </h3>
                             <ul id="malicious-url-list" style="display: none;">
-                                <div id="loadingMaliciousIndicators" class="loading-spinner" style="display: none;">
-                                    <img src="/static/loading.gif" alt="Loading...">
-                                </div>
+                              
                                 <li></li>
 
                             </ul>
@@ -366,10 +353,11 @@
                     <h3 class="extracted-resources-text">Extracted Resources</h3>
                     <a class="btnspan"
                         href="{{ url_for('download_zip', zip_name='extracted_resources_protected.zip') }}"
-                        title="Download and Check this file at your own risk, it may be malicious. Folder Password: mypassword"
+                        title="Download and Check this file at your own risk, it may be malicious. Folder Password: SecurePass123"
                         download>
                         Download ZIP
                     </a>
+                   
                 </div>
                 
                 <hr>
@@ -388,9 +376,7 @@
                         <tbody>
                             
                             <tr>
-                                <td id="loadingResources" class="loading-spinner" style="display: none;">
-                                    <img src="/static/loading.gif" alt="Loading...">
-                                </td>
+                               
                             </tr>
                         </tbody>
                     </table>
@@ -410,23 +396,17 @@
             
                     <div class="content">
                         <div id="ascii" class="tab-content active">
-                            <div id="loadingStrings" class="loading-spinner" style="display: none;">
-                                <img src="/static/loading.gif" alt="Loading...">
-                            </div>
+                            
                             <ul></ul>
                         </div>
             
                         <div id="wide" class="tab-content">
-                            <div id="loadingStrings" class="loading-spinner" style="display: none;">
-                                <img src="/static/loading.gif" alt="Loading...">
-                            </div>
+                           
                             <ul></ul>
                         </div>
             
                         <div id="rankedStrings" class="tab-content">
-                            <div id="loadingStrings" class="loading-spinner" style="display: none;">
-                                <img src="/static/loading.gif" alt="Loading...">
-                            </div>
+                            
                             <ul></ul>
                         </div>
                     </div>
@@ -442,462 +422,7 @@
             <a href="{{ url_for('upload_dashboard', session_id=session['session_id']) }}" class="download-button">Upload another file</a>
         </div>
     </div>
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const sessionId = "{{ session_id }}";
-            let fetchInterval;
-
-            // ✅ Display error messages
-            const displayError = (message) => {
-                const errorContainer = document.getElementById("error-message");
-                if (!errorContainer) {
-                    console.warn("Error container not found.");
-                    return;
-                }
-                errorContainer.innerHTML = `<p style="color: red;">${message}</p>`;
-                errorContainer.style.display = "block";
-            };
-
-            // ✅ Safe way to show/hide loading indicators
-            const showLoading = (id) => {
-                const element = document.getElementById(id);
-                if (element) element.style.display = "block";
-            };
-
-            const hideLoading = (id) => {
-                const element = document.getElementById(id);
-                if (element) element.style.display = "none";
-            };
-
-            // ✅ Fetch results periodically
-            const fetchResults = async () => {
-                try {
-                    const response = await fetch(`/check_status/${sessionId}`);
-                    if (!response.ok) throw new Error("Network response was not ok");
-
-                    const data = await response.json();
-                    // console.log("Fetched Data:", data);
-
-                    if (data.error) {
-                        displayError(data.error.message);
-                        return;
-                    }
-
-                    // ✅ Update UI with retrieved data
-                    updateScanResults(data.stats);
-                    updateChartResults(data.chart);
-                    updateCompilerInfo(data.compiler);
-                    updateFileDetails(data.filename, data.file_size);
-                    updateSectionHeaders(data.section_headers);
-                    updateImportTable(data.import_table);
-                    updateExportTable(data.export_table);
-                    populateMaliciousIndicators(data);
-                    updateTridAnalysis(data.trid);
-                    updateStrings(data);
-                    updateHighEntropySections(data.high_entropy_sections);
-                    updateExtractedResources(data.resource_details);
-                    updateMetadata(data.metadata);
-                    updateAttackTactics(data.tactics_techniques);
-                    updateMBCData(data.mbc_data);
-                    updateNamespaceCapabilities(data.capability_namespace);
-
-                    // ✅ Stop fetching once all results are complete
-                    if (data.complete) {
-                        clearInterval(fetchInterval);
-                        console.log("Fetching stopped. All results retrieved.");
-                    }
-                } catch (error) {
-                    console.error("Error fetching results:", error);
-                    displayError("Failed to fetch results. Please try again later.");
-                }
-            };
-
-            // ✅ Start polling for data every 5 seconds
-            fetchInterval = setInterval(fetchResults, 5000);
-            const updateScanResults = (stats) => {
-                showLoading("loadingScanResults");
-
-                setTimeout(() => {
-                    hideLoading("loadingScanResults");
-
-                    document.querySelector("#scanResults").innerHTML = `
-                        <p><strong>Total:</strong> ${stats.total}</p>
-                        <p><strong>Malicious:</strong> ${stats.malicious}</p>
-                        <p><strong>Clean:</strong> ${stats.harmless}</p>
-                        <p><strong>Suspicious:</strong> ${stats.suspicious}</p>
-                        <p><strong>Undetected:</strong> ${stats.undetected}</p>
-                        <p><strong>Timeout:</strong> ${stats.timeout}</p>
-                    `;
-
-                    document.getElementById("resultsTable").style.display = "table";
-                }, 1000);
-            };
-
-            const updateChartResults = (chart) => {
-                showLoading("loadingChartResults");
-
-                setTimeout(() => {
-                    hideLoading("loadingChartResults");
-                    document.querySelector("#chartImage").src = `/uploads/${chart}`;
-                }, 1000);
-            };
-
-
-            const updateCompilerInfo = (compiler) => {
-                showLoading("loadingCompilerInfo");
-
-                setTimeout(() => {
-                    hideLoading("loadingCompilerInfo");
-                    document.querySelector("#compiler-info").textContent = compiler || "N/A";
-                }, 1000);
-            };
-
-            const updateFileDetails = (filename, fileSize) => {
-                showLoading("loadingFileDetails");
-
-                setTimeout(() => {
-                    hideLoading("loadingFileDetails");
-                    if (filename) document.querySelector("#filename").innerText = filename;
-                    if (fileSize) document.querySelector("#fileSize").innerText = `${(fileSize / 1024).toFixed(2)} KB`;
-                }, 1000);
-            };
-
-            const updateSectionHeaders = (sectionHeaders) => {
-                showLoading("loadingSectionHeaders");
-
-                setTimeout(() => {
-                    hideLoading("loadingSectionHeaders");
-
-                    if (!sectionHeaders) return;
-                    const tableBody = document.querySelector(".section-headers tbody");
-                    tableBody.innerHTML = sectionHeaders.map(section => `
-                        <tr>
-                            <td>${section.name}</td>
-                            <td>${section.virtual_address}</td>
-                            <td>${section.virtual_size}</td>
-                            <td>${section.raw_size}</td>
-                            <td>${section.permissions}</td>
-                            <td>${section.entropy}</td>
-                        </tr>
-                    `).join('');
-                }, 1000);
-            };
-
-            const updateImportTable = (importTable) => {
-                showLoading("loadingImportTable");
-
-                setTimeout(() => {
-                    hideLoading("loadingImportTable");
-
-                    const container = document.getElementById("import-table-content");
-                    if (!importTable || importTable.length === 0) {
-                        container.innerHTML = "<p>No import table found.</p>";
-                        return;
-                    }
-                    container.innerHTML = importTable.map(dll => `
-                        <li>
-                            <span class="toggle-btn" onclick="toggleFunctions(this)" style="font-weight: bold; cursor: pointer;">- ${dll.dll}</span>
-                            <ul class="functions-list" style="display:none; background: #f4f4f4; padding: 10px; margin-left: 20px;">
-                                ${dll.functions.map(func => `<li style="list-style-type: none; padding-left: 10px;">- ${func}</li>`).join('')}
-                            </ul>
-                        </li>
-                    `).join('');
-                    document.querySelectorAll('.toggle-btn').forEach(button => {
-                        button.addEventListener("click", function () {
-                            const functionsList = this.nextElementSibling;
-                            if (functionsList.style.display === "none") {
-                                functionsList.style.display = "block";
-                                this.innerHTML = `- ${this.innerHTML.substring(2)}`;
-                            } else {
-                                functionsList.style.display = "none";
-                                this.innerHTML = `+ ${this.innerHTML.substring(2)}`;
-                            }
-                        });
-                    });
-                }, 1000);
-            };
-
-
-
-            const updateExportTable = (exportTable) => {
-                showLoading("loadingExportTable");
-
-                setTimeout(() => {
-                    hideLoading("loadingExportTable");
-
-                    if (!exportTable) return;
-                    document.querySelector(".export-table tbody").innerHTML = exportTable.map(entry => `
-                        <tr><td>${entry}</td></tr>
-                    `).join('');
-                }, 1000);
-            };
-
-            const populateMaliciousIndicators = (data) => {
-                console.log("[DEBUG] Starting to populate malicious indicators...");
-                showLoading("loadingMaliciousIndicators");
-
-                setTimeout(() => {
-                    hideLoading("loadingMaliciousIndicators");
-                    console.log("[DEBUG] Data received from backend:", data);
-
-                    const sections = [
-                        { key: "malicious_strings", listId: "malicious-strings-list", headerId: "malicious-strings-header" },
-                        { key: "malicious_apis", listId: "malicious-api-list", headerId: "malicious-apis-header" },
-                        { key: "emails_found", listId: "malicious-emails-list", headerId: "malicious-emails-header" },
-                        { key: "urls_found", listId: "malicious-url-list", headerId: "malicious-urls-header" }
-                    ];
-
-                    sections.forEach(section => {
-                        const content = data[section.key];
-                        const list = document.getElementById(section.listId);
-                        const header = document.getElementById(section.headerId);
-
-                        if (!list || !header) {
-                            console.warn(`[WARN] Missing DOM element for ${section.key}`);
-                            return;
-                        }
-
-                        // Clear previous contents
-                        list.innerHTML = "";
-
-                        if (Array.isArray(content)) {
-                            content.forEach(item => {
-                                const li = document.createElement("li");
-                                li.textContent = item;
-                                list.appendChild(li);
-                            });
-                        } else if (typeof content === 'object' && content !== null) {
-                            for (const [key, value] of Object.entries(content)) {
-                                const li = document.createElement("li");
-                                li.textContent = `${key}: ${value}`;
-                                list.appendChild(li);
-                            }
-                        } else {
-                            const li = document.createElement("li");
-                            li.textContent = "No data found.";
-                            list.appendChild(li);
-                        }
-
-                        // // Toggle functionality
-                        // header.addEventListener("click", () => {
-                        //     const isHidden = list.style.display === "none";
-                        //     list.style.display = isHidden ? "block" : "none";
-                        //     console.log(`[INFO] Toggled ${section.key} to`, isHidden ? "show" : "hide");
-                        // });
-
-                        // // Ensure initially hidden sections are displayed
-                        // list.style.display = "block";
-                    });
-
-                    console.log("[DEBUG] Malicious indicators populated successfully.");
-                }, 1000);
-            };
-
-
-            // const populateMaliciousIndicators = (data) => {
-            //     showLoading("loadingMaliciousIndicators");
-
-            //     setTimeout(() => {
-            //         hideLoading("loadingMaliciousIndicators");
-
-            //         const sections = [
-            //             { key: "malicious_strings", listId: "malicious-strings-list" },
-            //             { key: "malicious_apis", listId: "malicious-api-list" },
-            //             { key: "emails_found", listId: "malicious-emails-list" },
-            //             { key: "urls_found", listId: "malicious-url-list" }
-            //         ];
-
-            //         sections.forEach(section => {
-            //             const key = document.getElementById(section.key);
-            //             const list = document.getElementById(section.listId);
-
-            //             header.addEventListener("click", () => {
-            //                 list.style.display = list.style.display === "none" ? "block" : "none";
-            //             });
-            //         });
-            //     }, 1000);
-            // };
-
-
-            // const populateMaliciousIndicators = (data) => {
-            //     showLoading("loadingMaliciousIndicators");
-
-            //     setTimeout(() => {
-            //         hideLoading("loadingMaliciousIndicators");
-
-            //         const sections = [
-            //             { key: "malicious_strings", listId: "malicious-strings-list" },
-            //             { key: "malicious_apis", listId: "malicious-api-list" },
-            //             { key: "emails_found", listId: "malicious-emails-list" },
-            //             { key: "urls_found", listId: "malicious-url-list" }
-            //         ];
-            //         sections.forEach(section => {
-            //             // console.log("malicious_strings from backend:", data.malicious_strings);
-            //             console.log("malicious_strings:", data.malicious_strings, Array.isArray(data.malicious_strings));
-
-            //             const listElement = document.getElementById(section.listId);
-            //             listElement.innerHTML = data[section.key]?.length ? data[section.key].map(item => `<li>${item}</li>`).join('') : "<li>No data found</li>";
-            //             console.log(`Section: ${section.key}, Values:`, data[section.key]);
-
-            //         });
-            //     }, 1000);
-            // };
-
-            const updateTridAnalysis = (trid) => {
-                showLoading("loadingTridAnalysis");
-
-                setTimeout(() => {
-                    hideLoading("loadingTridAnalysis");
-
-                    if (trid) document.querySelector(".card-trid pre").innerText = trid;
-                }, 1000);
-            };
-
-            const updateStrings = (data) => {
-                showLoading("loadingStrings");
-
-                setTimeout(() => {
-                    hideLoading("loadingStrings");
-
-                    if (data.ascii_strings) {
-                        document.querySelector("#ascii ul").innerHTML = data.ascii_strings.map(str => `<li>${str}</li>`).join('');
-                    }
-                    if (data.wide_strings) {
-                        document.querySelector("#wide ul").innerHTML = data.wide_strings.map(str => {
-                            const decrypted = str.decrypted ? `<strong>Decrypted:</strong> ${str.decrypted}` : `<em>Decrypted:</em> Not available`;
-                            return `<li>
-                                        <strong>Encrypted:</strong> ${str.encrypted}<br/>
-                                        ${decrypted}
-                                    </li>`;
-                        }).join('');
-                    }
-                    if (data.ranked_strings) {
-                        document.querySelector("#rankedStrings ul").innerHTML = data.ranked_strings.map(([string, score]) =>
-                            `<li>${string} (Score: ${score})</li>`
-                        ).join('');
-                    }
-                }, 1000);
-            };
-
-            const updateHighEntropySections = (sections) => {
-                showLoading("loadingEntropy");
-
-                setTimeout(() => {
-                    hideLoading("loadingEntropy");
-
-                    if (sections) {
-                        document.querySelector(".entropy-table tbody").innerHTML = sections.map(section => `<tr><td>${section}</td></tr>`).join('');
-                    }
-                }, 1000);
-            };
-
-            const updateExtractedResources = (resources) => {
-                showLoading("loadingResources");
-
-                setTimeout(() => {
-                    hideLoading("loadingResources");
-
-                    if (!resources) return;
-                    const tableBody = document.querySelector(".resource-table tbody");
-                    tableBody.innerHTML = resources.map(resource => `
-                        <tr>
-                            <td>${resource.type}</td>
-                            <td>${resource.size} bytes</td>
-                            <td>${resource.filename}</td>
-                            <td>${resource.extracted_text || '—'}</td>
-                            <td>${resource.raw_content || '—'}</td>
-                        </tr>
-                    `).join('');
-                }, 1000);
-            };
-       
-            const updateMetadata = (metadata) => {
-                    showLoading("loadingMetadata");
-
-                    setTimeout(() => {
-                        hideLoading("loadingMetadata");
-
-                        if (!metadata) return;
-
-                        document.getElementById("md5").innerText = metadata.md5 || "N/A";
-                        document.getElementById("sha1").innerText = metadata.sha1 || "N/A";
-                        document.getElementById("sha256").innerText = metadata.sha256 || "N/A";
-                        document.getElementById("analysis").innerText = metadata.analysis || "N/A";
-                        document.getElementById("operatingSystem").innerText = metadata.os || "N/A";
-                        document.getElementById("format").innerText = metadata.format || "N/A";
-                        document.getElementById("architecture").innerText = metadata.arch || "N/A";
-
-                        document.getElementById("metadataTable").style.display = "table"; // Show the table after loading
-                    }, 1000);
-            };
-
-
-            const updateAttackTactics = (tacticsTechniques) => {
-                    showLoading("loadingAttackTactics");
-
-                    setTimeout(() => {
-                        hideLoading("loadingAttackTactics");
-
-                        const attackList = document.getElementById("attack-tactics");
-                        attackList.innerHTML = ""; // Clear previous entries
-
-                        if (tacticsTechniques && tacticsTechniques.length > 0) {
-                            tacticsTechniques.forEach(([tactic, technique]) => {
-                                attackList.innerHTML += `<li><strong>${tactic}</strong> - ${technique}</li>`;
-                            });
-                        } else {
-                            attackList.innerHTML = "<li>No ATT&CK data found.</li>";
-                        }
-
-                        attackList.style.display = "block"; // Show list after loading
-                    }, 1000);
-            };
-
-            const updateMBCData = (mbcData) => {
-                    showLoading("loadingMBCData");
-
-                    setTimeout(() => {
-                        hideLoading("loadingMBCData");
-
-                        const mbcList = document.getElementById("mbc-data");
-                        mbcList.innerHTML = "";
-
-                        if (mbcData && mbcData.length > 0) {
-                            mbcData.forEach(([objective, behavior]) => {
-                                mbcList.innerHTML += `<li><strong>${objective}</strong> - ${behavior}</li>`;
-                            });
-                        } else {
-                            mbcList.innerHTML = "<li>No MBC data found.</li>";
-                        }
-
-                        mbcList.style.display = "block"; // Show list after loading
-                    }, 1000);
-            };
-
-            const updateNamespaceCapabilities = (capabilityNamespace) => {
-                    showLoading("loadingNamespaceCapabilities");
-
-                    setTimeout(() => {
-                        hideLoading("loadingNamespaceCapabilities");
-
-                        const namespaceList = document.getElementById("namespace-capabilities");
-                        namespaceList.innerHTML = "";
-
-                        if (capabilityNamespace && capabilityNamespace.length > 0) {
-                            capabilityNamespace.forEach(([capability, namespace]) => {
-                                namespaceList.innerHTML += `<li><strong>${capability}</strong> - ${namespace}</li>`;
-                            });
-                        } else {
-                            namespaceList.innerHTML = "<li>No Namespace & Capabilities found.</li>";
-                        }
-
-                        namespaceList.style.display = "block"; // Show list after loading
-                    }, 1000);
-            };
-    });
-
-
-    </script>
+    
     <script>
         function tArrow() {
             const content = document.querySelector(".hiddenContent");
@@ -994,6 +519,491 @@
             document.getElementById(tabName).classList.add("active");
             document.querySelector(`button[onclick="openTab('${tabName}')"]`).classList.add("active");
         }
+
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const sessionId = "{{ session_id }}"; // This is templated by your server
+            let fetchInterval;
+            let fetchingMessageHidden = false;
+
+            // 🔵 Hide the fetching message
+            const hideFetchingMessage = () => {
+                const msg = document.getElementById("fetching-message");
+                if (msg) msg.style.display = "none";
+            };
+
+            // 🔴 Show error messages
+            const displayError = (message) => {
+                const errorContainer = document.getElementById("error-message");
+                if (!errorContainer) {
+                    console.warn("Error container not found.");
+                    return;
+                }
+                errorContainer.innerHTML = `<p style="color: red;">${message}</p>`;
+                errorContainer.style.display = "block";
+            };
+
+            // 🔁 Fetch results periodically
+            const fetchResults = async () => {
+                try {
+                    const response = await fetch(`/check_status/${sessionId}`);
+                    if (!response.ok) throw new Error("Network response was not ok");
+
+                    const data = await response.json();
+
+                    if (data.error) {
+                        displayError(data.error.message);
+                        return;
+                    }
+
+                    // ✅ Update UI with retrieved data
+                    updateScanResults(data.stats);
+                    updateChartResults(data.chart);
+                    updateCompilerInfo(data.compiler);
+                    updateFileDetails(data.filename, data.file_size);
+                    updateSectionHeaders(data.section_headers);
+                    updateImportTable(data.import_table);
+                    updateExportTable(data.export_table);
+                    populateMaliciousIndicators(data);
+                    updateTridAnalysis(data.trid);
+                    updateStrings(data);
+                    updateHighEntropySections(data.high_entropy_sections);
+                    updateExtractedResources(data.resource_details);
+                    updateMetadata(data.metadata);
+                    updateAttackTactics(data.tactics_techniques, data.complete);
+                    updateMBCData(data.mbc_data, data.complete);
+                    updateNamespaceCapabilities(data.capability_namespace, data.complete);
+
+                    if (data.complete) {
+                        clearInterval(fetchInterval);
+                        hideFetchingMessage(); 
+                        console.log("Fetching stopped. All results retrieved.");
+                    }
+                } catch (error) {
+                    console.error("Error fetching results:", error);
+                    displayError("Failed to fetch results. Please try again later.");
+                }
+            };
+
+            // ✅ Start polling for data every 5 seconds
+            fetchInterval = setInterval(fetchResults, 5000);
+            const updateScanResults = (stats) => {
+                // showLoading("loadingScanResults");
+
+                setTimeout(() => {
+                    // hideLoading("loadingScanResults");
+                    try {
+                        const scanResultsContainer = document.querySelector("#scanResults");
+                        if (!scanResultsContainer) {
+                            throw new Error("Scan results container not found.");
+                        }
+
+                        scanResultsContainer.innerHTML = `
+                            <p><strong>Total:</strong> ${stats.total}</p>
+                            <p><strong>Malicious:</strong> ${stats.malicious}</p>
+                            <p><strong>Clean:</strong> ${stats.harmless}</p>
+                            <p><strong>Suspicious:</strong> ${stats.suspicious}</p>
+                            <p><strong>Undetected:</strong> ${stats.undetected}</p>
+                            <p><strong>Timeout:</strong> ${stats.timeout}</p>
+                        `;
+
+                        const resultsTable = document.getElementById("resultsTable");
+                        if (resultsTable) {
+                            resultsTable.style.display = "table";
+                        } else {
+                            console.warn("Results table not found.");
+                        }
+                    } catch (error) {
+                        console.error(`❌ Error updating scan results:`, error);
+                        const scanResultsContainer = document.querySelector("#scanResults");
+                        if (scanResultsContainer) {
+                            scanResultsContainer.innerHTML = `<p style="color: red; font-weight: bold;">⚠️ Failed to load scan results.</p>`;
+                        }
+                    } finally {
+                        // hideLoading("loadingScanResults");
+                    }
+                }, 1000);
+            };
+
+
+            const updateChartResults = (chart) => {
+                setTimeout(() => {
+                    try {
+                        if (!chart) {
+                            throw new Error("Chart filename is undefined.");
+                        }
+
+                        const chartImage = document.querySelector("#chartImage");
+                        if (!chartImage) {
+                            throw new Error("Chart image element not found.");
+                        }
+
+                        console.log('Updating chart image with filename:', chart);
+                        chartImage.src = `/uploads/${chart}`;
+
+                        const chartContainer = document.getElementById("chartContainer");
+                        if (chartContainer) {
+                            chartContainer.style.display = "block";
+                        } else {
+                            console.warn("Chart container not found.");
+                        }
+
+                    } catch (error) {
+                        console.error("❌ Error updating chart results:", error);
+                        const chartContainer = document.querySelector("#chartContainer");
+                        if (chartContainer) {
+                            chartContainer.innerHTML = `<p style="color: red; font-weight: bold;">⚠️ Failed to load chart.</p>`;
+                        }
+                    } finally {
+                        hideLoading("loadingChartResults");
+                    }
+                }, 1000);
+            };
+
+
+            const updateCompilerInfo = (compiler) => {
+                // showLoading("loadingCompilerInfo");
+
+                setTimeout(() => {
+                    // hideLoading("loadingCompilerInfo");
+                    document.querySelector("#compiler-info").textContent = compiler || "N/A";
+                }, 1000);
+            };
+
+            const updateFileDetails = (filename, fileSize) => {
+                // showLoading("loadingFileDetails");
+
+                setTimeout(() => {
+                    // hideLoading("loadingFileDetails");
+                    if (filename) document.querySelector("#filename").innerText = filename;
+                    if (fileSize) document.querySelector("#fileSize").innerText = `${(fileSize / 1024).toFixed(2)} KB`;
+                }, 1000);
+            };
+
+            const updateSectionHeaders = (section_headers) => {
+                // showLoading("loadingSectionHeaders");
+
+                setTimeout(() => {
+                    // hideLoading("loadingSectionHeaders");
+
+                    if (!section_headers) return;
+                    const tableBody = document.querySelector(".section-headers tbody");
+                    tableBody.innerHTML = section_headers.map(section => `
+                        <tr>
+                            <td>${section.name}</td>
+                            <td>${section.virtual_address}</td>
+                            <td>${section.virtual_size}</td>
+                            <td>${section.raw_size}</td>
+                            <td>${section.permissions}</td>
+                            <td>${section.entropy}</td>
+                        </tr>
+                    `).join('');
+                }, 1000);
+            };
+
+            const updateImportTable = (import_table) => {
+                // showLoading("loadingImportTable");
+
+                setTimeout(() => {
+                    // hideLoading("loadingImportTable");
+
+                    const container = document.getElementById("import-table-content");
+                    if (!import_table || import_table.length === 0) {
+                        container.innerHTML = "<p>No import table found.</p>";
+                        return;
+                    }
+                    container.innerHTML = import_table.map(dll => `
+                        <li>
+                            <span class="toggle-btn" onclick="toggleFunctions(this)" style="font-weight: bold; cursor: pointer;">- ${dll.dll}</span>
+                            <ul class="functions-list" style="display:none; background: #f4f4f4; padding: 10px; margin-left: 20px;">
+                                ${dll.functions.map(func => `<li style="list-style-type: none; padding-left: 10px;">- ${func}</li>`).join('')}
+                            </ul>
+                        </li>
+                    `).join('');
+                    document.querySelectorAll('.toggle-btn').forEach(button => {
+                        button.addEventListener("click", function () {
+                            const functionsList = this.nextElementSibling;
+                            if (functionsList.style.display === "none") {
+                                functionsList.style.display = "block";
+                                this.innerHTML = `- ${this.innerHTML.substring(2)}`;
+                            } else {
+                                functionsList.style.display = "none";
+                                this.innerHTML = `+ ${this.innerHTML.substring(2)}`;
+                            }
+                        });
+                    });
+                }, 1000);
+            };
+
+
+
+            const updateExportTable = (export_table) => {
+                // showLoading("loadingExportTable");
+
+                setTimeout(() => {
+                    // hideLoading("loadingExportTable");
+
+                    if (!export_table) return;
+                    document.querySelector(".export-table tbody").innerHTML = export_table.map(entry => `
+                        <tr><td>${entry}</td></tr>
+                    `).join('');
+                }, 1000);
+            };
+
+            const populateMaliciousIndicators = (data) => {
+                // console.log("[DEBUG] Starting to populate malicious indicators...");
+                // showLoading("loadingMaliciousIndicators");
+
+                setTimeout(() => {
+                    // hideLoading("loadingMaliciousIndicators");
+                    // console.log("[DEBUG] Data received from backend:", data);
+
+                    const sections = [
+                        { key: "malicious_strings", listId: "malicious-strings-list", headerId: "malicious-strings-header" },
+                        { key: "malicious_apis", listId: "malicious-api-list", headerId: "malicious-apis-header" },
+                        { key: "emails_found", listId: "malicious-emails-list", headerId: "malicious-emails-header" },
+                        { key: "urls_found", listId: "malicious-url-list", headerId: "malicious-urls-header" }
+                    ];
+
+                    sections.forEach(section => {
+                        const content = data[section.key];
+                        const list = document.getElementById(section.listId);
+                        const header = document.getElementById(section.headerId);
+
+                        if (!list || !header) {
+                            console.warn(`[WARN] Missing DOM element for ${section.key}`);
+                            return;
+                        }
+
+                        // Clear previous contents
+                        list.innerHTML = "";
+
+                        if (Array.isArray(content)) {
+                            content.forEach(item => {
+                                const li = document.createElement("li");
+                                li.textContent = item;
+                                list.appendChild(li);
+                            });
+                        } else if (typeof content === 'object' && content !== null) {
+                            for (const [key, value] of Object.entries(content)) {
+                                const li = document.createElement("li");
+                                li.textContent = `${key}: ${value}`;
+                                list.appendChild(li);
+                            }
+                        } else {
+                            const li = document.createElement("li");
+                            li.textContent = "No data found.";
+                            list.appendChild(li);
+                        }
+
+                    });
+
+                    // console.log("[DEBUG] Malicious indicators populated successfully.");
+                }, 1000);
+            };
+
+            const updateTridAnalysis = (trid) => {
+                // showLoading("loadingTridAnalysis");
+
+                setTimeout(() => {
+                    // hideLoading("loadingTridAnalysis");
+
+                    if (trid) document.querySelector(".card-trid pre").innerText = trid;
+                }, 1000);
+            };
+
+            const updateStrings = (data) => {
+
+                setTimeout(() => {
+
+                    if (data.ascii_strings) {
+                        document.querySelector("#ascii ul").innerHTML = data.ascii_strings.map(str => `<li>${str}</li>`).join('');
+                    }
+                    if (data.wide_strings) {
+                        document.querySelector("#wide ul").innerHTML = data.wide_strings.map(str => {
+                            if (str.decrypted !== null) {
+                                // String was detected as base64 and decoded
+                                return `<li>
+                                            <strong>Encrypted:</strong> ${str.encrypted}<br/>
+                                            <strong>Decrypted:</strong> ${str.decrypted}
+                                        </li>`;
+                            } else {
+                                // Not encrypted or couldn't be decrypted
+                                return `<li>${str.encrypted}</li>`;
+                            }
+                        }).join('');
+                    }
+                    if (data.ranked_strings) {
+                        document.querySelector("#rankedStrings ul").innerHTML = data.ranked_strings.map(([string, score]) =>
+                            `<li>${string} (Score: ${score})</li>`
+                        ).join('');
+                    }
+                }, 1000);
+            };
+
+            const updateHighEntropySections = (high_entropy_sections) => {
+                // showLoading("loadingEntropy");
+
+                setTimeout(() => {
+                    // hideLoading("loadingEntropy");
+
+                    if (sections) {
+                        document.querySelector(".entropy-table tbody").innerHTML = sections.map(section => `<tr><td>${section}</td></tr>`).join('');
+                    }
+                }, 1000);
+            };
+
+            const updateExtractedResources = (resources) => {
+                // showLoading("loadingResources");
+
+                setTimeout(() => {
+                    // hideLoading("loadingResources");
+
+                    if (!resources) return;
+                    const tableBody = document.querySelector(".resource-table tbody");
+                    tableBody.innerHTML = resources.map(resource => `
+                        <tr>
+                            <td>${resource.type}</td>
+                            <td>${resource.size} KB</td>
+                            <td>${resource.filename}</td>
+                            <td>${resource.extracted_text || '—'}</td>
+                            <td>${resource.raw_content || '—'}</td>
+                        </tr>
+                    `).join('');
+                }, 1000);
+            };
+
+            const updateMetadata = (metadata) => {
+                // showLoading("loadingMetadata");
+
+                setTimeout(() => {
+                    // hideLoading("loadingMetadata");
+
+                    if (!metadata) return;
+
+                    document.getElementById("md5").innerText = metadata.md5 || "N/A";
+                    document.getElementById("sha1").innerText = metadata.sha1 || "N/A";
+                    document.getElementById("sha256").innerText = metadata.sha256 || "N/A";
+                    document.getElementById("analysis").innerText = metadata.analysis || "N/A";
+                    document.getElementById("operatingSystem").innerText = metadata.os || "N/A";
+                    document.getElementById("format").innerText = metadata.format || "N/A";
+                    document.getElementById("architecture").innerText = metadata.arch || "N/A";
+
+                    document.getElementById("metadataTable").style.display = "table"; // Show the table after loading
+                }, 1000);
+            };
+
+            async function updateAttackTactics(tacticsTechniquesPromise, isFinal = false) {
+                console.log("Fetching DOM elements...");
+                const attackList = document.getElementById("attack-tactics");
+                const spinner = document.getElementById("spinner-attack");
+
+                console.log("Waiting for tacticsTechniquesPromise to resolve...");
+                let tacticsTechniques = await tacticsTechniquesPromise;
+                console.log("Received tacticsTechniques:", tacticsTechniques);
+
+                if (tacticsTechniques && tacticsTechniques.length > 0) {
+                    const validItems = tacticsTechniques.filter(
+                        ([tactic, technique]) => tactic && technique
+                    );
+                    console.log("Filtered valid items:", validItems);
+
+                    if (validItems.length > 0) {
+                        // ✅ Remove spinner as soon as we're about to print *any* data
+                        spinner?.remove();
+
+                        validItems.forEach(([tactic, technique]) => {
+                            attackList.innerHTML += `<li><strong>${tactic}</strong> - ${technique}</li>`;
+                        });
+
+                        return; // ✅ We're done
+                    }
+                }
+
+                // ✅ Show fallback only on final fetch
+                if (isFinal) {
+                    console.log("Final fetch & no valid data — showing fallback and removing spinner.");
+                    spinner?.remove();
+                    attackList.innerHTML += "<li>No ATT&CK data found.</li>";
+                } else {
+                    console.log("No valid data yet — keeping spinner for now.");
+                }
+            }
+
+            async function updateMBCData(mbcDataPromise, isFinal = false) {
+                console.log("Fetching DOM elements...");
+                const mbcList = document.getElementById("mbc-data");
+                const spinner = document.getElementById("spinner-mbc");
+
+                console.log("Waiting for mbcDataPromise to resolve...");
+                let mbcData = await mbcDataPromise;
+                console.log("Received mbcData:", mbcData);
+
+                if (mbcData && mbcData.length > 0) {
+                    // Filter valid items (both objective and behavior should be present)
+                    const validItems = mbcData.filter(([objective, behavior]) => objective && behavior);
+                    console.log("Filtered valid items:", validItems);
+
+                    if (validItems.length > 0) {
+                        // ✅ Remove spinner as soon as we're about to print *any* data
+                        spinner?.remove();
+
+                        validItems.forEach(([objective, behavior]) => {
+                            mbcList.innerHTML += `<li><strong>${objective}</strong> - ${behavior}</li>`;
+                        });
+
+                        return; // ✅ We're done
+                    }
+                }
+
+                // ✅ Show fallback only on final fetch
+                if (isFinal) {
+                    console.log("Final fetch & no valid data — showing fallback and removing spinner.");
+                    spinner?.remove();
+                    mbcList.innerHTML += "<li>No MBC data found.</li>";
+                } else {
+                    console.log("No valid data yet — keeping spinner for now.");
+                }
+            }
+
+            async function updateNamespaceCapabilities(capabilityNamespacePromise, isFinal = false) {
+                console.log("Fetching DOM elements...");
+                const namespaceList = document.getElementById("namespace-capabilities");
+                const spinner = document.getElementById("spinner-namespace");
+
+                console.log("Waiting for capabilityNamespacePromise to resolve...");
+                let capabilityNamespace = await capabilityNamespacePromise;
+                console.log("Received capabilityNamespace:", capabilityNamespace);
+
+                if (capabilityNamespace && capabilityNamespace.length > 0) {
+                    // Filter valid items (both capability and namespace should be present)
+                    const validItems = capabilityNamespace.filter(([capability, namespace]) => capability && namespace);
+                    console.log("Filtered valid items:", validItems);
+
+                    if (validItems.length > 0) {
+                        // ✅ Remove spinner as soon as we're about to print *any* data
+                        spinner?.remove();
+
+                        validItems.forEach(([capability, namespace]) => {
+                            namespaceList.innerHTML += `<li><strong>${capability}</strong> - ${namespace}</li>`;
+                        });
+
+                        return; // ✅ We're done
+                    }
+                }
+
+                // ✅ Show fallback only on final fetch
+                if (isFinal) {
+                    console.log("Final fetch & no valid data — showing fallback and removing spinner.");
+                    spinner?.remove();
+                    namespaceList.innerHTML += "<li>No namespace capabilities found.</li>";
+                } else {
+                    console.log("No valid data yet — keeping spinner for now.");
+                }
+            }
+
+        });
 
     </script>
 </body>

@@ -11,7 +11,6 @@ import uuid
 import re
 import uuid
 import os
-from datetime import timedelta
 from functools import wraps
 from flask_sqlalchemy import SQLAlchemy
 import requests
@@ -364,19 +363,12 @@ def save_results_to_pdf(result_data):
             # print(f"Adding ASCII string: {string}")
             add_line(f"- {string}", indent=20)
         
-
         # Wide Strings
         add_line("Extracted Wide Strings:")
         for entry in result_data.get("wide_strings", []):
-            encrypted = entry.get("encrypted", "")
-            decrypted = entry.get("decrypted", None)
-
-            if decrypted is not None:
-                add_line(f"- Encrypted: {encrypted}", indent=20)
-                add_line(f"  Decrypted: {decrypted}", indent=24)
-            else:
-                add_line(f"- {encrypted}", indent=20)
-
+            decrypted = entry.get("decrypted", "N/A")
+            # print(f"Adding wide string: {entry['encrypted']} (Decrypted: {decrypted})")
+            add_line(f"- {entry['encrypted']} (Decrypted: {decrypted})", indent=20)
         
         # Ranked Strings
         add_line("Ranked Strings:")
@@ -401,7 +393,8 @@ def save_results_to_pdf(result_data):
         print(f"Error during PDF generation: {e}")
         return None
 
-
+import os
+from flask import send_from_directory, abort
 
 @app.route('/download_report/<path:output_filename>')
 def download_report(output_filename):
@@ -668,6 +661,8 @@ def check_for_malicious_indicators(strings, imports):
     return dict(string_counts), dict(api_counts), emails_found, urls_found
 
 
+
+
 def cleanup(folder_path):
     """Delete all previous contents of a folder and recreate it."""
     try:
@@ -744,6 +739,18 @@ def extract_resources_async(file_path, session_id):
 
         # Now send this list to frontend via API or store in DB if async
         update_analysis_result(session_id, "resource_details", resource_data_list)
+
+        # for file_path in extracted_resources:
+        #     # print(f"\nFile: {os.path.basename(file_path)}")
+
+        #     file_type = detect_file_type(file_path)
+        #     # print(f"Type: {file_type}")
+
+        #     file_size = os.path.getsize(file_path)
+        #     # print(f"Size: {file_size} bytes")
+
+        #     if file_type.startswith("image/"):
+        #         # print("Performing OCR...")
         #         extracted_text = perform_ocr(file_path)
         #         # print(f"Extracted Text: {extracted_text}")
         #     else:
@@ -828,6 +835,49 @@ def extract_from_rsrc(pe, output_folder):
                         file_path = save_resource(resource_data, output_folder, file_extension)
                         extracted_resources.append(file_path)
 
+    # for entry in pe.DIRECTORY_ENTRY_RESOURCE.entries:
+    #     if hasattr(entry, 'directory'):
+    #         for resource in entry.directory.entries:
+    #             if hasattr(resource, 'directory'):
+    #                 for res_entry in resource.directory.entries:
+    #                     try:
+    #                         data_rva = res_entry.data.struct.OffsetToData
+    #                         size = res_entry.data.struct.Size
+    #                         resource_data = pe.get_memory_mapped_image()[data_rva:data_rva + size]
+
+    #                         file_extension = ''
+    #                         if res_entry.name is not None:
+    #                             resource_name = res_entry.name.string.decode('utf-8', errors='ignore')
+    #                             if 'PNG' in resource_name:
+    #                                 file_extension = '.png'
+    #                             elif 'JPEG' in resource_name or 'JPG' in resource_name:
+    #                                 file_extension = '.jpg'
+    #                             elif 'PDF' in resource_name:
+    #                                 file_extension = '.pdf'
+    #                             elif 'TXT' in resource_name:
+    #                                 file_extension = '.txt'
+
+    #                         file_path = save_resource(resource_data, output_folder, file_extension)
+
+    #                         if file_path:
+    #                             file_size = os.path.getsize(file_path)
+    #                             file_type = detect_file_type(file_path)  # ✅ Detect file type
+    #                             extracted_text = perform_ocr(image_path)# ✅ OCR if image
+    #                             raw_content = read_raw_content(file_path)  # ✅ Read raw content
+
+    #                             extracted_resources.append({
+    #                                 "filename": os.path.basename(file_path),
+    #                                 "size": file_size,
+    #                                 "type": file_type,
+    #                                 "details": resource_name if res_entry.name else "N/A",
+    #                                 "extracted_text": extracted_text,
+    #                                 "raw_content": raw_content
+    #                             })
+    #                         else:
+    #                             print(f"[ERROR] Failed to save extracted resource.")
+
+    #                     except Exception as e:
+    #                         print(f"[ERROR] Error extracting resource: {e}")
 
     return  extracted_resources
 
@@ -1054,7 +1104,7 @@ def format_parsed_data(parsed_data):
                 seen.add(line)
     return formatted_output
 
-
+import re
 
 def extract_metadata(formatted_data):
     # print("Extracting metadata...")
@@ -1093,6 +1143,7 @@ def extract_metadata(formatted_data):
     # print("Final extracted metadata:", metadata)
     return metadata
 
+import re
 
 def extract_attack_tactics_techniques(formatted_data):
     tactics_techniques = []
@@ -1214,6 +1265,97 @@ def extract_capability_namespace(formatted_data):
 
     return capability_data
 
+# def extract_mbc(formatted_data):
+#     mbc_data = []
+#     mbc_section_started = False  
+#     mbc_pattern = re.compile(r"^([A-Z\s\-]+?)\s*-\s*(.+)$")
+    
+#     if isinstance(formatted_data, str):
+#         formatted_data = formatted_data.splitlines()
+    
+#     conn = connect_db()  # Establish database connection
+#     if conn:
+#         cursor = conn.cursor(dictionary=True)
+        
+#         # Fetch all behavior IDs and links from the database in one query
+#         cursor.execute("SELECT id, value FROM mbc_link")
+#         db_results = {row["id"]: row["value"] for row in cursor.fetchall()} 
+        
+#         # Behavior ID pattern to match different formats
+#         behavior_id_pattern = re.compile(r"\b([A-Z]\d{4}(?:\.\d{3,4}|\.m\d{2,3})?)\b")
+
+#         for line in formatted_data:
+#             line = line.strip()
+            
+#             if "MBC Objective - MBC Behavior" in line:
+#                 mbc_section_started = True
+#                 continue 
+            
+#             if mbc_section_started:
+#                 if not line or "ATT&CK" in line or "-" not in line:
+#                     break
+                
+#                 match = mbc_pattern.match(line)
+#                 if match:
+#                     objective = match.group(1).strip()
+#                     behavior = match.group(2).strip()
+
+#                     # Find all matching behavior IDs in the behavior description
+#                     behavior_ids = behavior_id_pattern.findall(behavior)
+                    
+#                     if behavior_ids:
+#                         for behavior_id in behavior_ids:
+#                             if behavior_id in db_results:
+#                                 behavior_link = db_results[behavior_id]
+#                                 behavior = behavior.replace(
+#                                     behavior_id,
+#                                     f'<a href="{behavior_link}" target="_blank">{behavior_id}</a>'
+#                                 )
+#                             else:
+#                                 print(f"Behavior ID {behavior_id} not found in database, keeping original.")
+                    
+#                     mbc_data.append((objective, behavior))
+        
+#         cursor.close()
+#         conn.close()
+    
+#     # print("Final extracted MBC behaviors:", mbc_data)
+#     return mbc_data
+
+# def extract_capability_namespace(formatted_data):
+#     # print("Extracting capability namespaces...")
+#     capability_namespace_data = []
+#     capability_namespace_pattern = re.compile(r"(.+?)\s*-\s*(.+)")
+    
+#     if isinstance(formatted_data, str):
+#         formatted_data = formatted_data.splitlines()
+    
+#     capability_section = False  
+    
+#     for line in formatted_data:
+#         line = line.strip() 
+#         # print(f"Processing line: {line}")
+        
+#         if line.startswith("Capability - Namespace"):
+#             capability_section = True
+#             # print("Capability section started...")
+#             continue  
+        
+#         if capability_section:
+#             if not line or "-" not in line:
+#                 break
+            
+#             match = capability_namespace_pattern.match(line)
+#             if match:
+#                 capability = match.group(1).strip()  
+#                 namespace = match.group(2).strip() 
+#                 capability_namespace_data.append((capability, namespace))
+#                 # print(f"Extracted: {capability} -> {namespace}")
+    
+#     # print("Final extracted capability namespaces:", capability_namespace_data)
+#     return capability_namespace_data
+
+
 
 
 
@@ -1228,7 +1370,7 @@ def result(session_id):
 def serve_file(filename):
     return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
 
-
+from datetime import timedelta
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'  # SQLite database
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -1369,8 +1511,10 @@ def upload_file(session_id):
     return redirect(url_for("upload_dashboard", session_id=session_id))
 
 
+
+
 # ✅ LOGOUT Route
-@app.route("/logout", methods=["POST"])
+@app.route("/logout")
 def logout():
     session.clear()
     flash("You have been logged out successfully.", "success")
